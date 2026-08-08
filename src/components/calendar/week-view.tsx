@@ -22,7 +22,7 @@ export function WeekView({ week, tasks, onTaskClick }: { week: Date; tasks: Task
                   onClick={() => onTaskClick(task)}
                   className="block w-full rounded-lg border border-border bg-card p-2 text-left hover:shadow-card transition-shadow"
                 >
-                  <p className="truncate text-xs font-medium">{task.title}</p>
+                  <p className="truncate text-xs font-medium">{ task.title }</p>
                   <div className="mt-1">
                     <PriorityBadge priority={task.priority} />
                   </div>
