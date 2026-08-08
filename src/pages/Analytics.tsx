@@ -15,9 +15,9 @@ export default function Analytics() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
-        <p className="text-sm text-muted-foreground">Deep insights into your team's performance and progress.</p>
+      <div className="border-b border-slate-200 pb-4">
+        <h1 className="text-3xl font-extrabold tracking-tight text-[#141e30]">Analytics</h1>
+        <p className="text-sm font-medium text-slate-500 mt-1">Deep insights into your team's performance and progress.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
