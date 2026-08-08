@@ -59,7 +59,7 @@ export function MonthView({ month, tasks, onTaskClick }: { month: Date; tasks: T
                   <button
                     key={task.id}
                     onClick={() => onTaskClick(task)}
-                    className="block w-full truncate rounded-md bg-primary-50 px-1.5 py-0.5 text-left text-[11px] font-medium text-primary-700 hover:bg-primary-100 dark:bg-primary-500/10 dark:text-primary-400"
+                    className=" block w-full truncate rounded-md bg-primary-50 px-1.5 py-0.5 text-left text-[11px] font-medium text-primary-700 hover:bg-primary-100 dark:bg-primary-500/10 dark:text-primary-400 "
                   >
                     {task.title}
                   </button>
