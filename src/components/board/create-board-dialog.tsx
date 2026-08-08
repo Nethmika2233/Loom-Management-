@@ -26,10 +26,25 @@ export function CreateBoardDialog({ open, onOpenChange }: { open: boolean; onOpe
   const [color, setColor] = useState(COLOR_OPTIONS[0]);
 
   const handleCreate = () => {
-    if (!name.trim()) {
+    const trimmedName = name.trim();
+    
+    if (!trimmedName) {
       toast.error("Board name is required");
       return;
     }
+    if (trimmedName.length < 3) {
+      toast.error("Board name is too short", {
+        description: "Board name must be at least 3 characters long."
+      });
+      return;
+    }
+    if (trimmedName.length > 50) {
+      toast.error("Board name letter count exceeded", {
+        description: "Board name cannot exceed 50 characters. Please shorten it."
+      });
+      return;
+    }
+
     const id = `b${Date.now()}`;
     const board: Board = {
       id,
@@ -68,7 +83,7 @@ export function CreateBoardDialog({ open, onOpenChange }: { open: boolean; onOpe
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
             <Label htmlFor="board-name">Board name</Label>
-            <Input id="board-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Product Launch Q4" autoFocus />
+            <Input id="board-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Product Launch Q4 (3-50 chars)" autoFocus />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="board-desc">Description</Label>
