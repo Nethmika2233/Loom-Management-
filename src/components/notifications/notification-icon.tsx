@@ -14,7 +14,7 @@ const CONFIG: Record<NotificationType, { icon: typeof Bell; className: string }>
 export function NotificationIcon({ type }: { type: NotificationType }) {
   const { icon: Icon, className } = CONFIG[type];
   return (
-    <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", className)}>
+    <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset ring-black/5 dark:ring-white/10", className)}>
       <Icon className="h-4 w-4" />
     </div>
   );
