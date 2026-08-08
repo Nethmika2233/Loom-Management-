@@ -43,12 +43,14 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
   const [newChecklistItem, setNewChecklistItem] = useState("");
   const [commentText, setCommentText] = useState("");
   const [loggedHours, setLoggedHours] = useState(0);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   useEffect(() => {
     if (task) {
       setTitle(task.title);
       setDescription(task.description ?? "");
       setLoggedHours(task.loggedHours ?? 0);
+      setConfirmingDelete(false);
     }
   }, [task]);
 
@@ -409,9 +411,31 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
               </div>
             </div>
 
-            <Button variant="outline" className="w-full text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-500/10" onClick={handleDelete}>
-              <Trash2 className="h-4 w-4" /> Delete task
-            </Button>
+            {confirmingDelete ? (
+              <div className="space-y-1.5">
+                <p className="text-xs text-muted-foreground">Delete this task? This can't be undone.</p>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => setConfirmingDelete(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-500/10"
+                    onClick={handleDelete}
+                  >
+                    <Trash2 className="h-4 w-4" /> Confirm
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                className="w-full text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-500/10"
+                onClick={() => setConfirmingDelete(true)}
+              >
+                <Trash2 className="h-4 w-4" /> Delete task
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>
