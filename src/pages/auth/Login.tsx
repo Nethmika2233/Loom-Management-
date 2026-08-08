@@ -96,7 +96,7 @@ export default function Login() {
 
         <div className="space-y-1.5">
           <Label htmlFor="username">Username</Label>
-          <Input id="username" type="text" placeholder={loginAs === "admin" ? "Admin" : "you@loom.io"} {...register("username")} />
+          <Input id="username" type="text" placeholder="Enter any username" {...register("username")} />
           {errors.username && <p className="text-xs text-danger-600">{errors.username.message}</p>}
         </div>
 
