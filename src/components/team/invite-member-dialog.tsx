@@ -15,6 +15,10 @@ export function InviteMemberDialog({ open, onOpenChange }: { open: boolean; onOp
       toast.error("Enter a valid email address");
       return;
     }
+    if (!role) {
+      toast.error("Please select a role");
+      return;
+    }
     toast.success("Invitation sent", { description: `Invited ${email} as ${role}` });
     setEmail("");
     onOpenChange(false);
@@ -30,7 +34,7 @@ export function InviteMemberDialog({ open, onOpenChange }: { open: boolean; onOp
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
             <Label htmlFor="invite-email">Email address</Label>
-            <Input id="invite-email" type="email" placeholder="colleague@company.com" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus />
+            <Input id="invite-email" type="email" placeholder="Enter team member email (e.g., name@company.com)" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus />
           </div>
           <div className="space-y-1.5">
             <Label>Role</Label>

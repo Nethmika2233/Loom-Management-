@@ -7,7 +7,7 @@ import { useTaskStore } from "@/store/taskStore";
 import type { User } from "@/types";
 
 const STATUS_DOT: Record<User["status"], string> = {
-  online: "bg-success-500",
+  online: "bg-success-500 animate-pulse",
   away: "bg-warning-500",
   offline: "bg-slate-400",
 };
@@ -26,7 +26,7 @@ export function MemberCard({ member, index = 0 }: { member: User; index?: number
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.04 }}>
-      <Card className="p-5 hover:shadow-elevated transition-shadow">
+      <Card className="p-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
         <div className="flex items-start gap-3">
           <div className="relative">
             <Avatar className="h-12 w-12">
@@ -45,7 +45,7 @@ export function MemberCard({ member, index = 0 }: { member: User; index?: number
         </div>
 
         <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-          <span>{member.department}</span>
+          <span className="uppercase text-[10px] font-medium tracking-wider">{member.department}</span>
           <span className="capitalize">{member.status}</span>
         </div>
 
