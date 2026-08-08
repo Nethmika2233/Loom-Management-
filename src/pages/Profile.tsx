@@ -132,11 +132,21 @@ export default function Profile() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="current-password">Current password</Label>
-              <Input id="current-password" type="password" placeholder="••••••••" />
+              <Input
+  id="current-password"
+  type="password"
+  placeholder="••••••••"
+  autoComplete="current-password"
+/>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="new-password">New password</Label>
-              <Input id="new-password" type="password" placeholder="••••••••" />
+              <Input
+  id="new-password"
+  type="password"
+  placeholder="••••••••"
+  autoComplete="new-password"
+/>
             </div>
           </div>
           <Button
