@@ -65,7 +65,7 @@ export default function ForgotPassword() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="you@company.com" {...register("email")} />
+          <Input id="email" type="email" placeholder="you@loom.io" {...register("email")} />
           {errors.email && <p className="text-xs text-danger-600">{errors.email.message}</p>}
         </div>
 
