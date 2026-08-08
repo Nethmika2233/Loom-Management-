@@ -7,6 +7,7 @@ interface NotificationState {
   notifications: AppNotification[];
   unreadCount: () => number;
   markAsRead: (id: string) => Promise<void>;
+  markAsUnread: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
 }
 
@@ -22,6 +23,15 @@ export const useNotificationStore = create<NotificationState>()((set, get) => ({
     } catch (e) {
       // fallback: mark locally if service fails
       set((state) => ({ notifications: state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)) }));
+    }
+  },
+  markAsUnread: async (id: string) => {
+    try {
+      await notificationService.markAsUnread(id);
+      const updated = await notificationService.getNotifications();
+      set(() => ({ notifications: updated }));
+    } catch (e) {
+      set((state) => ({ notifications: state.notifications.map((n) => (n.id === id ? { ...n, read: false } : n)) }));
     }
   },
   markAllAsRead: async () => {
