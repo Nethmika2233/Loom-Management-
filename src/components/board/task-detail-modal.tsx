@@ -398,7 +398,7 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
                     min={0}
                     value={loggedHours}
                     onChange={(e) => {
-                      const val = Number(e.target.value);
+                      const val = Math.max(0, Number(e.target.value));
                       setLoggedHours(val);
                       updateTask(task.id, { loggedHours: val });
                     }}
