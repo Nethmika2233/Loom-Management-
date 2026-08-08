@@ -13,7 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -109,6 +109,7 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
   return (
     <Dialog open={!!task} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl p-0 gap-0">
+        <DialogTitle className="sr-only">{task.title}</DialogTitle>
         <div className="grid grid-cols-1 md:grid-cols-[1fr_260px] max-h-[85vh]">
           <div className="overflow-y-auto p-6 space-y-6">
             <div className="flex items-center gap-2">
