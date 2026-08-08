@@ -49,13 +49,13 @@ export default function Settings() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <Label>Workspace name</Label>
-                <Input defaultValue="Loom Inc." />
+                <Label htmlFor="workspace-name">Workspace name</Label>
+<Input id="workspace-name" defaultValue="Loom Inc." />
               </div>
               <div className="space-y-1.5">
-                <Label>Language</Label>
-                <Select defaultValue="en">
-                  <SelectTrigger className="sm:w-64">
+                <Label htmlFor="language">Language</Label>
+<Select defaultValue="en">
+  <SelectTrigger id="language" className="sm:w-64">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -68,9 +68,9 @@ export default function Settings() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>Timezone</Label>
-                <Select defaultValue="utc">
-                  <SelectTrigger className="sm:w-64">
+               <Label htmlFor="timezone">Timezone</Label>
+<Select defaultValue="utc">
+  <SelectTrigger id="timezone" className="sm:w-64">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
