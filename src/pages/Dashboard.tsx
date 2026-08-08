@@ -36,7 +36,7 @@ export default function Dashboard() {
         <StatCard label="Total Tasks" value={totalTasks} icon={ListTodo} accent="bg-secondary-50 text-secondary-600 dark:bg-secondary-500/10 dark:text-secondary-400" delay={0.03} />
         <StatCard label="Completed" value={completed} trend={12} icon={CheckCircle2} accent="bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-500" delay={0.06} />
         <StatCard label="In Progress" value={inProgress} icon={Clock} accent="bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-500" delay={0.09} />
-        <StatCard label="Overdue" value={overdue} trend={-4} icon={AlertTriangle} accent="bg-danger-50 text-danger-600 dark:bg-danger-500/10 dark:text-danger-500" delay={0.12} />
+        <StatCard label="Overdue" value={overdue} trend={-4} invertTrend icon={AlertTriangle} accent="bg-danger-50 text-danger-600 dark:bg-danger-500/10 dark:text-danger-500" delay={0.12} />
         <StatCard label="Productivity" value={productivity} suffix="%" trend={8} icon={TrendingUp} accent="bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400" delay={0.15} />
       </div>
 

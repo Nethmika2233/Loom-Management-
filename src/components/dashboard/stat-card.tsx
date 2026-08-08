@@ -11,12 +11,13 @@ interface StatCardProps {
   suffix?: string;
   icon: LucideIcon;
   trend?: number;
+  invertTrend?: boolean;
   accent: string;
   delay?: number;
 }
 
-export function StatCard({ label, value, suffix = "", icon: Icon, trend, accent, delay = 0 }: StatCardProps) {
-  const positive = (trend ?? 0) >= 0;
+export function StatCard({ label, value, suffix = "", icon: Icon, trend, invertTrend, accent, delay = 0 }: StatCardProps) {
+  const positive = invertTrend ? (trend ?? 0) <= 0 : (trend ?? 0) >= 0;
 
   return (
     <motion.div
