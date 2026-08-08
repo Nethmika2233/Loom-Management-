@@ -60,7 +60,7 @@ export function BoardCard({ board, index = 0, onRename }: { board: Board; index?
           className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/20 backdrop-blur hover:bg-white/30"
           aria-label="Toggle favorite"
         >
-          <Star className={cn("h-4 w-4 text-white", board.favorite && "fill-warning-400 text-warning-400")} />
+          <Star className={cn("h-4 w-4 text-white", board.favorite && "fill-warning-500 text-warning-500")} />
         </button>
 
         <DropdownMenu>
