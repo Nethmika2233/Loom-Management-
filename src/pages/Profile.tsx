@@ -25,9 +25,19 @@ export default function Profile() {
   if (!user) return null;
 
   const handleSave = () => {
-    updateProfile({ name, title, bio });
-    toast.success("Profile updated");
-  };
+  if (!name.trim()) {
+    toast.error("Full name is required");
+    return;
+  }
+
+  updateProfile({
+    name: name.trim(),
+    title: title.trim(),
+    bio: bio.trim(),
+  });
+
+  toast.success("Profile updated");
+};
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-4 sm:p-6">
