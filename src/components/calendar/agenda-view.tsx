@@ -31,7 +31,7 @@ export function AgendaView({ tasks, onTaskClick }: { tasks: Task[]; onTaskClick:
               <span className={cn("text-lg font-bold", overdue && "text-danger-600")}>{format(due, "d")}</span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{task.title}</p>
+              <p className="truncate text-sm font-semibold"> {task.title} </p>
               <p className="truncate text-xs text-muted-foreground">{task.description}</p>
             </div>
             <PriorityBadge priority={task.priority} />
