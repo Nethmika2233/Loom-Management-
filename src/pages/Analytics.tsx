@@ -1,4 +1,4 @@
-import { Award, CheckCircle2, TrendingUp, Zap } from "lucide-react";
+import { Award, CheckCircle2, TrendingUp, Zap, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ProjectProgressChart } from "@/components/charts/project-progress-chart";
@@ -15,9 +15,15 @@ export default function Analytics() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
-      <div className="border-b border-slate-200 pb-4">
-        <h1 className="text-3xl font-extrabold tracking-tight text-[#141e30]">Analytics</h1>
-        <p className="text-sm font-medium text-slate-500 mt-1">Deep insights into your team's performance and progress.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-4">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-[#141e30]">Analytics</h1>
+          <p className="text-sm font-medium text-slate-500 mt-1">Deep insights into your team's performance and progress.</p>
+        </div>
+        <button className="mt-4 sm:mt-0 flex items-center gap-2 rounded-md bg-[#141e30] px-4 py-2 text-sm font-medium text-white hover:bg-[#243b55] transition-colors shadow-sm">
+          <Download className="h-4 w-4" />
+          Export Report
+        </button>
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -27,7 +33,7 @@ export default function Analytics() {
         <StatCard label="Top Performer" value={31} suffix=" tasks" icon={Award} accent="bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-500" />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Project Progress</CardTitle>
@@ -46,7 +52,7 @@ export default function Analytics() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Completion Rate Trend</CardTitle>
@@ -67,7 +73,7 @@ export default function Analytics() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Most Active Members</CardTitle>
+          <CardTitle>Team Activity Metrics</CardTitle>
         </CardHeader>
         <CardContent>
           <MemberActivityChart />
