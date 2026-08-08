@@ -88,7 +88,7 @@ export function TaskCard({ task, onClick }: { task: Task; onClick: () => void })
                   <Paperclip className="h-3.5 w-3.5" /> {task.attachments.length}
                 </span>
               )}
-              {task.estimatedHours && (
+              {task.estimatedHours > 0 && (
                 <span className="text-[11px]">{task.estimatedHours}h est.</span>
               )}
             </div>
