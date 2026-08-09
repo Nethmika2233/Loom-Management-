@@ -6,6 +6,7 @@ import { getInitials, cn } from "@/lib/utils";
 import { useTaskStore } from "@/store/taskStore";
 import type { User } from "@/types";
 
+// Maps user availability status to corresponding Tailwind color classes
 const STATUS_DOT: Record<User["status"], string> = {
   online: "bg-success-500 animate-pulse",
   away: "bg-warning-500",
@@ -33,7 +34,10 @@ export function MemberCard({ member, index = 0 }: { member: User; index?: number
               <AvatarImage src={member.avatarUrl} alt={member.name} />
               <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
             </Avatar>
-            <span className={cn("absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-card", STATUS_DOT[member.status])} />
+            <span 
+              className={cn("absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-card", STATUS_DOT[member.status])} 
+              aria-label={`Status: ${member.status}`}
+            />
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{member.name}</p>
