@@ -77,7 +77,7 @@ export default function Analytics() {
       </motion.div>
 
       {/* Top Level Metrics */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <motion.div variants={itemVariants} className="grid grid-cols-2 gap-5 lg:grid-cols-4">
         <StatCard
           label="Completion Rate"
           value={completionRate}
