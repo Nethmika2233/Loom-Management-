@@ -73,7 +73,7 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
         )}
 
         {adding ? (
-          <div className="space-y-2 rounded-xl border border-border bg-card p-2.5">
+          <div className="space-y-2 rounded-xl border border-border bg-card p-2.5 shadow-sm">
             <Input
               autoFocus
               placeholder="Task title..."
@@ -83,9 +83,10 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
                 if (e.key === "Enter") submit();
                 if (e.key === "Escape") setAdding(false);
               }}
+              className="h-9"
             />
             <div className="flex gap-2">
-              <Button size="sm" onClick={submit}>
+              <Button size="sm" onClick={submit} className="flex-1">
                 Add task
               </Button>
               <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>
@@ -96,7 +97,7 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
         ) : (
           <button
             onClick={() => setAdding(true)}
-            className="flex w-full items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border/80 bg-background/40 px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:bg-background hover:text-foreground"
           >
             <Plus className="h-4 w-4" /> Add task
           </button>
