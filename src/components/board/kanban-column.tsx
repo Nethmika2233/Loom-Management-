@@ -23,17 +23,22 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
 
   const done = tasks.filter((t) => t.status === "done").length;
   const progress = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
+  const canSubmit = title.trim().length > 0;
 
   const submit = () => {
-    if (title.trim()) {
-      onAddTask(column.id, title.trim());
-      setTitle("");
-    }
+    if (!canSubmit) return;
+    onAddTask(column.id, title.trim());
+    setTitle("");
+    setAdding(false);
+  };
+
+  const cancelAdd = () => {
+    setTitle("");
     setAdding(false);
   };
 
   return (
-    <div className="flex w-[min(82vw,20rem)] shrink-0 flex-col rounded-2xl border border-border/60 bg-muted/40 sm:w-80">
+    <div className="flex min-h-0 w-[min(82vw,20rem)] shrink-0 flex-col rounded-2xl border border-border/60 bg-muted/40 sm:w-80">
       <div className="sticky top-0 z-10 rounded-t-2xl bg-muted/40 backdrop-blur px-3.5 pb-2 pt-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -53,7 +58,7 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
       <div
         ref={setNodeRef}
         className={cn(
-          "flex-1 space-y-2.5 overflow-y-auto rounded-b-2xl px-3.5 pb-3.5 pt-1 min-h-[120px] transition-all duration-200",
+          "flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto rounded-b-2xl px-3.5 pb-3.5 pt-1 min-h-[120px] transition-all duration-200",
           isOver && "border border-dashed border-primary/60 bg-primary/5 shadow-inner shadow-primary/10"
         )}
       >
@@ -81,15 +86,15 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
               onChange={(e) => setTitle(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") submit();
-                if (e.key === "Escape") setAdding(false);
+                if (e.key === "Escape") cancelAdd();
               }}
               className="h-9"
             />
             <div className="flex gap-2">
-              <Button size="sm" onClick={submit} className="flex-1">
+              <Button size="sm" onClick={submit} className="flex-1" disabled={!canSubmit}>
                 Add task
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>
+              <Button size="sm" variant="ghost" onClick={cancelAdd}>
                 Cancel
               </Button>
             </div>
