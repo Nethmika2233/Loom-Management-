@@ -13,7 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -43,12 +43,14 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
   const [newChecklistItem, setNewChecklistItem] = useState("");
   const [commentText, setCommentText] = useState("");
   const [loggedHours, setLoggedHours] = useState(0);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   useEffect(() => {
     if (task) {
       setTitle(task.title);
       setDescription(task.description ?? "");
       setLoggedHours(task.loggedHours ?? 0);
+      setConfirmingDelete(false);
     }
   }, [task]);
 
@@ -109,6 +111,7 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
   return (
     <Dialog open={!!task} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl p-0 gap-0">
+        <DialogTitle className="sr-only">{task.title}</DialogTitle>
         <div className="grid grid-cols-1 md:grid-cols-[1fr_260px] max-h-[85vh]">
           <div className="overflow-y-auto p-6 space-y-6">
             <div className="flex items-center gap-2">
@@ -397,7 +400,7 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
                     min={0}
                     value={loggedHours}
                     onChange={(e) => {
-                      const val = Number(e.target.value);
+                      const val = Math.max(0, Number(e.target.value));
                       setLoggedHours(val);
                       updateTask(task.id, { loggedHours: val });
                     }}
@@ -408,9 +411,31 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
               </div>
             </div>
 
-            <Button variant="outline" className="w-full text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-500/10" onClick={handleDelete}>
-              <Trash2 className="h-4 w-4" /> Delete task
-            </Button>
+            {confirmingDelete ? (
+              <div className="space-y-1.5">
+                <p className="text-xs text-muted-foreground">Delete this task? This can't be undone.</p>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => setConfirmingDelete(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-500/10"
+                    onClick={handleDelete}
+                  >
+                    <Trash2 className="h-4 w-4" /> Confirm
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                className="w-full text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-500/10"
+                onClick={() => setConfirmingDelete(true)}
+              >
+                <Trash2 className="h-4 w-4" /> Delete task
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>
