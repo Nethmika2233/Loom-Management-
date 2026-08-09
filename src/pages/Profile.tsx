@@ -25,9 +25,19 @@ export default function Profile() {
   if (!user) return null;
 
   const handleSave = () => {
-    updateProfile({ name, title, bio });
-    toast.success("Profile updated");
-  };
+  if (!name.trim()) {
+    toast.error("Full name is required");
+    return;
+  }
+
+  updateProfile({
+    name: name.trim(),
+    title: title.trim(),
+    bio: bio.trim(),
+  });
+
+  toast.success("Profile updated");
+};
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-4 sm:p-6">
@@ -122,16 +132,48 @@ export default function Profile() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="current-password">Current password</Label>
-              <Input id="current-password" type="password" placeholder="••••••••" />
+              <Input
+  id="current-password"
+  type="password"
+  placeholder="••••••••"
+  autoComplete="current-password"
+/>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="new-password">New password</Label>
-              <Input id="new-password" type="password" placeholder="••••••••" />
+              <Input
+  id="new-password"
+  type="password"
+  placeholder="••••••••"
+  autoComplete="new-password"
+/>
             </div>
           </div>
-          <Button variant="outline" onClick={() => toast.success("Password updated")}>
-            Update password
-          </Button>
+          <Button
+  variant="outline"
+  onClick={() => {
+    const currentPassword = (
+      document.getElementById("current-password") as HTMLInputElement
+    )?.value;
+    const newPassword = (
+      document.getElementById("new-password") as HTMLInputElement
+    )?.value;
+
+    if (!currentPassword || !newPassword) {
+      toast.error("Please enter both passwords");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error("New password must be at least 8 characters");
+      return;
+    }
+
+    toast.success("Password updated");
+  }}
+>
+  Update password
+</Button>
         </CardContent>
       </Card>
     </div>
