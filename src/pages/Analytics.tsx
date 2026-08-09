@@ -71,7 +71,7 @@ export default function Analytics() {
 
           <button className="flex items-center gap-2 rounded-md bg-[#141e30] px-5 py-2 text-sm font-semibold text-[#D4AF37] hover:bg-[#243b55] hover:text-white transition-all shadow-md focus:ring-2 focus:ring-[#D4AF37] focus:outline-none">
             <Download className="h-4 w-4" />
-            Export Report
+            Download Data
           </button>
         </div>
       </motion.div>
