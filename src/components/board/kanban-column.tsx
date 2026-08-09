@@ -54,11 +54,20 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
         ref={setNodeRef}
         className={cn("flex-1 space-y-2.5 overflow-y-auto px-3.5 pb-3.5 pt-1 min-h-[120px] transition-colors rounded-b-2xl", isOver && "bg-primary-50/50 dark:bg-primary-500/5")}
       >
-        <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-          {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
-          ))}
-        </SortableContext>
+        {tasks.length === 0 && !adding ? (
+          <div className="mt-2 flex min-h-[130px] flex-1 items-center justify-center rounded-xl border border-dashed border-border/80 bg-background/40 px-3 text-center">
+            <div>
+              <p className="text-sm font-medium text-foreground">No tasks yet</p>
+              <p className="mt-1 text-xs text-muted-foreground">Add a task or drop one here</p>
+            </div>
+          </div>
+        ) : (
+          <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+            {tasks.map((task) => (
+              <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
+            ))}
+          </SortableContext>
+        )}
 
         {adding ? (
           <div className="space-y-2 rounded-xl border border-border bg-card p-2.5">
