@@ -78,7 +78,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Role Distribution</CardTitle>
+            <CardTitle>Role Distribution</CardTitle> // Role Distribution Chart 
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={240}>
