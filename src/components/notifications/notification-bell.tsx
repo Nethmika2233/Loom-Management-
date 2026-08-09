@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Bell } from "lucide-react";
+import { Bell, CheckCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import {
   DropdownMenu,
@@ -18,42 +18,67 @@ export function NotificationBell() {
   const unread = useNotificationStore((s) => s.unreadCount());
   const markAsRead = useNotificationStore((s) => s.markAsRead);
   const markAllAsRead = useNotificationStore((s) => s.markAllAsRead);
+  const previewNotifications = notifications.slice(0, 6);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
-          <Bell className="h-4.5 w-4.5" />
+        <Button variant="ghost" size="icon" className="relative" aria-label={`${unread} unread notifications`}>
+          <Bell className={cn("h-4.5 w-4.5", unread > 0 && "text-primary-600")} />
           {unread > 0 && (
-            <span className="absolute right-1.5 top-1.5 flex h-2 w-2 rounded-full bg-danger-500 ring-2 ring-background" />
+            <span className="absolute -right-0.5 -top-0.5 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-danger-500 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-background">
+              {unread > 9 ? "9+" : unread}
+            </span>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 p-0">
+      <DropdownMenuContent align="end" className="w-80 overflow-hidden p-0 sm:w-96">
         <div className="flex items-center justify-between border-b border-border px-3 py-2.5">
-          <p className="text-sm font-semibold">Notifications</p>
+          <div>
+            <p className="text-sm font-semibold">Notifications</p>
+            <p className="text-xs text-muted-foreground">
+              {unread > 0 ? `${unread} unread update${unread === 1 ? "" : "s"}` : "All caught up"}
+            </p>
+          </div>
           {unread > 0 && (
-            <button onClick={markAllAsRead} className="text-xs font-medium text-primary-600 hover:underline">
-              Mark all as read
-            </button>
+            <Button variant="ghost" size="sm" onClick={markAllAsRead}>
+              <CheckCheck className="h-4 w-4" /> Read all
+            </Button>
           )}
         </div>
-        <div className="max-h-80 overflow-y-auto">
-          {notifications.slice(0, 6).map((n) => (
-            <DropdownMenuItem key={n.id} asChild onClick={() => markAsRead(n.id)}>
-              <Link to={n.link ?? "#"} className={cn("flex items-start gap-3 px-3 py-2.5", !n.read && "bg-primary-50/50 dark:bg-primary-500/5")}>
-                <NotificationIcon type={n.type} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{n.title}</p>
-                  <p className="line-clamp-2 text-xs text-muted-foreground">{n.description}</p>
-                  <p className="mt-0.5 text-[11px] text-muted-foreground">
-                    {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
-                  </p>
-                </div>
-                {!n.read && <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary-600" />}
-              </Link>
-            </DropdownMenuItem>
-          ))}
+
+        <div className="max-h-96 overflow-y-auto">
+          {previewNotifications.length === 0 ? (
+            <div className="px-4 py-8 text-center">
+              <Bell className="mx-auto h-8 w-8 text-muted-foreground" />
+              <p className="mt-3 text-sm font-medium">No notifications yet</p>
+              <p className="text-xs text-muted-foreground">New task updates will appear here.</p>
+            </div>
+          ) : (
+            previewNotifications.map((notification) => (
+              <DropdownMenuItem key={notification.id} asChild onClick={() => markAsRead(notification.id)}>
+                <Link
+                  to={notification.link ?? "#"}
+                  className={cn(
+                    "flex items-start gap-3 px-3 py-3",
+                    !notification.read && "bg-primary-50/50 dark:bg-primary-500/5"
+                  )}
+                >
+                  <NotificationIcon type={notification.type} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm font-medium">{notification.title}</p>
+                      {!notification.read && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary-600" />}
+                    </div>
+                    <p className="line-clamp-2 text-xs text-muted-foreground">{notification.description}</p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                    </p>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+            ))
+          )}
         </div>
         <DropdownMenuSeparator className="m-0" />
         <Link to="/notifications" className="block px-3 py-2.5 text-center text-sm font-medium text-primary-600 hover:bg-muted">

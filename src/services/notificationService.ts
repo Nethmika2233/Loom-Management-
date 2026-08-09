@@ -14,6 +14,10 @@ export const notificationService = {
     await delay(80);
     notifications = notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
   },
+  async markAsUnread(id: string): Promise<void> {
+    await delay(80);
+    notifications = notifications.map((n) => (n.id === id ? { ...n, read: false } : n));
+  },
   async markAllAsRead(): Promise<void> {
     await delay(80);
     notifications = notifications.map((n) => ({ ...n, read: true }));
