@@ -22,6 +22,8 @@ const ROLE_VARIANT: Record<User["role"], "default" | "info" | "secondary" | "out
 
 export function MemberCard({ member, index = 0 }: { member: User; index?: number }) {
   const tasks = useTaskStore((s) => s.tasks);
+  
+  // Calculate how many tasks are assigned and completed for this specific member
   const assigned = tasks.filter((t) => t.assigneeIds.includes(member.id));
   const completed = assigned.filter((t) => t.status === "done");
 
@@ -49,7 +51,12 @@ export function MemberCard({ member, index = 0 }: { member: User; index?: number
         </div>
 
         <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-          <span className="uppercase text-[10px] font-medium tracking-wider">{member.department}</span>
+          <span 
+            className="uppercase text-[10px] font-medium tracking-wider cursor-help" 
+            title={`Department: ${member.department}`}
+          >
+            {member.department}
+          </span>
           <span className="capitalize">{member.status}</span>
         </div>
 
