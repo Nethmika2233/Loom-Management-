@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Copy, MoreHorizontal, Pencil, Star, Trash2, Archive } from "lucide-react";
@@ -11,6 +12,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { useBoardStore } from "@/store/boardStore";
 import { useTaskStore } from "@/store/taskStore";
 import type { Board } from "@/types";
@@ -18,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export function BoardCard({ board, index = 0, onRename }: { board: Board; index?: number; onRename: (board: Board) => void }) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const toggleFavorite = useBoardStore((s) => s.toggleFavorite);
   const duplicateBoard = useBoardStore((s) => s.duplicateBoard);
   const archiveBoard = useBoardStore((s) => s.archiveBoard);
@@ -60,7 +71,7 @@ export function BoardCard({ board, index = 0, onRename }: { board: Board; index?
           className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/20 backdrop-blur hover:bg-white/30"
           aria-label="Toggle favorite"
         >
-          <Star className={cn("h-4 w-4 text-white", board.favorite && "fill-warning-400 text-warning-400")} />
+          <Star className={cn("h-4 w-4 text-white", board.favorite && "fill-warning-500 text-warning-500")} />
         </button>
 
         <DropdownMenu>
@@ -85,13 +96,39 @@ export function BoardCard({ board, index = 0, onRename }: { board: Board; index?
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-danger-600 focus:bg-danger-50 dark:focus:bg-danger-500/10"
-              onClick={() => { deleteBoard(board.id); toast.success("Board deleted"); }}
+              onClick={() => setShowDeleteDialog(true)}
             >
               <Trash2 className="h-4 w-4" /> Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </Card>
+
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you sure you want to delete this board?</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete <strong>"{board.name}"</strong> and all associated tasks.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                deleteBoard(board.id);
+                toast.success("Board deleted");
+                setShowDeleteDialog(false);
+              }}
+            >
+              Delete Board
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

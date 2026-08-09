@@ -20,20 +20,48 @@ const COLOR_OPTIONS = [
 
 export function CreateBoardDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const navigate = useNavigate();
+  const boards = useBoardStore((s) => s.boards);
   const createBoard = useBoardStore((s) => s.createBoard);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState(COLOR_OPTIONS[0]);
 
   const handleCreate = () => {
-    if (!name.trim()) {
+    const trimmedName = name.trim();
+    
+    if (!trimmedName) {
       toast.error("Board name is required");
       return;
     }
+    if (trimmedName.length < 3) {
+      toast.error("Board name is too short", {
+        description: "Board name must be at least 3 characters long."
+      });
+      return;
+    }
+    if (trimmedName.length > 50) {
+      toast.error("Board name letter count exceeded", {
+        description: "Board name cannot exceed 50 characters. Please shorten it."
+      });
+      return;
+    }
+
+    // Check for duplicate board name (case-insensitive)
+    const isDuplicate = boards.some(
+      (b) => b.name.trim().toLowerCase() === trimmedName.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      toast.error("Board name already exists", {
+        description: "A board with this name already exists. Please choose a different name."
+      });
+      return;
+    }
+
     const id = `b${Date.now()}`;
     const board: Board = {
       id,
-      name,
+      name: trimmedName,
       description,
       workspaceId: "w1",
       columns: [
@@ -50,7 +78,7 @@ export function CreateBoardDialog({ open, onOpenChange }: { open: boolean; onOpe
       updatedAt: new Date().toISOString(),
     };
     createBoard(board);
-    toast.success("Board created", { description: name });
+    toast.success("Board created", { description: trimmedName });
     onOpenChange(false);
     setName("");
     setDescription("");
@@ -68,7 +96,7 @@ export function CreateBoardDialog({ open, onOpenChange }: { open: boolean; onOpe
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
             <Label htmlFor="board-name">Board name</Label>
-            <Input id="board-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Product Launch Q4" autoFocus />
+            <Input id="board-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Product Launch Q4 (3-50 chars)" autoFocus />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="board-desc">Description</Label>
