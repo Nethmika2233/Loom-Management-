@@ -9,7 +9,15 @@ export function ProjectProgressChart() {
       <BarChart data={projectProgress} layout="vertical" margin={{ left: 12, right: 20 }}>
         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
         <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
-        <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+        <YAxis
+          type="category"
+          dataKey="name"
+          width={130}
+          tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+          tickFormatter={(value: string) => (value.length > 16 ? `${value.slice(0, 15)}…` : value)}
+          axisLine={false}
+          tickLine={false}
+        />
         <Tooltip
           cursor={{ fill: "hsl(var(--muted))" }}
           contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--popover))", fontSize: 13 }}
