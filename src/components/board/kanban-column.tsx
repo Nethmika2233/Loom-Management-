@@ -23,17 +23,22 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
 
   const done = tasks.filter((t) => t.status === "done").length;
   const progress = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
+  const canSubmit = title.trim().length > 0;
 
   const submit = () => {
-    if (title.trim()) {
-      onAddTask(column.id, title.trim());
-      setTitle("");
-    }
+    if (!canSubmit) return;
+    onAddTask(column.id, title.trim());
+    setTitle("");
+    setAdding(false);
+  };
+
+  const cancelAdd = () => {
+    setTitle("");
     setAdding(false);
   };
 
   return (
-    <div className="flex w-80 shrink-0 flex-col rounded-2xl bg-muted/40 border border-border/60">
+    <div className="flex min-h-0 w-[min(82vw,20rem)] shrink-0 flex-col rounded-2xl border border-border/60 bg-muted/40 sm:w-80">
       <div className="sticky top-0 z-10 rounded-t-2xl bg-muted/40 backdrop-blur px-3.5 pb-2 pt-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -52,16 +57,32 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
 
       <div
         ref={setNodeRef}
-        className={cn("flex-1 space-y-2.5 overflow-y-auto px-3.5 pb-3.5 pt-1 min-h-[120px] transition-colors rounded-b-2xl", isOver && "bg-primary-50/50 dark:bg-primary-500/5")}
+        className={cn(
+          "flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto rounded-b-2xl px-3.5 pb-3.5 pt-1 min-h-[120px] transition-all duration-200",
+          isOver && "border border-dashed border-primary/60 bg-primary/5 shadow-inner shadow-primary/10"
+        )}
       >
-        <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-          {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
-          ))}
-        </SortableContext>
+        {tasks.length === 0 && !adding ? (
+          <button
+            type="button"
+            onClick={() => setAdding(true)}
+            className="mt-2 flex min-h-[130px] flex-1 items-center justify-center rounded-xl border border-dashed border-border/80 bg-background/40 px-3 text-center transition-colors hover:border-primary/50 hover:bg-background"
+          >
+            <div>
+              <p className="text-sm font-medium text-foreground">No tasks yet</p>
+              <p className="mt-1 text-xs text-muted-foreground">Add a task or drop one here</p>
+            </div>
+          </button>
+        ) : (
+          <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+            {tasks.map((task) => (
+              <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
+            ))}
+          </SortableContext>
+        )}
 
         {adding ? (
-          <div className="space-y-2 rounded-xl border border-border bg-card p-2.5">
+          <div className="space-y-2 rounded-xl border border-border bg-card p-2.5 shadow-sm">
             <Input
               autoFocus
               placeholder="Task title..."
@@ -69,14 +90,15 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
               onChange={(e) => setTitle(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") submit();
-                if (e.key === "Escape") setAdding(false);
+                if (e.key === "Escape") cancelAdd();
               }}
+              className="h-9"
             />
             <div className="flex gap-2">
-              <Button size="sm" onClick={submit}>
+              <Button size="sm" onClick={submit} className="flex-1" disabled={!canSubmit}>
                 Add task
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>
+              <Button size="sm" variant="ghost" onClick={cancelAdd}>
                 Cancel
               </Button>
             </div>
@@ -84,7 +106,7 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
         ) : (
           <button
             onClick={() => setAdding(true)}
-            className="flex w-full items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border/80 bg-background/40 px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:bg-background hover:text-foreground"
           >
             <Plus className="h-4 w-4" /> Add task
           </button>
