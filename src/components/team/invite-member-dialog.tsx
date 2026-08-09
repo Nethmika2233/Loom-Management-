@@ -10,19 +10,23 @@ export function InviteMemberDialog({ open, onOpenChange }: { open: boolean; onOp
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("member");
 
-  const handleInvite = () => {
-    if (!email.trim() || !email.includes("@")) {
-      toast.error("Enter a valid email address");
-      return;
-    }
-    if (!role) {
-      toast.error("Please select a role");
-      return;
-    }
-    toast.success("Invitation sent", { description: `Invited ${email} as ${role}` });
-    setEmail("");
-    onOpenChange(false);
-  };
+// Validates input, sends invitation, and resets form state
+const handleInvite = () => {
+  if (!email.trim() || !email.includes("@")) {
+    toast.error("Enter a valid email address");
+    return;
+  }
+  if (!role) {
+    toast.error("Please select a role");
+    return;
+  }
+  toast.success("Invitation sent", { description: `Invited ${email} as ${role}` });
+
+  // Reset form fields
+  setEmail("");
+  setRole("member");
+  onOpenChange(false);
+};
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
