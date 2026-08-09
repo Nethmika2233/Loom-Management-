@@ -13,6 +13,7 @@ const STATUS_DOT: Record<User["status"], string> = {
   offline: "bg-slate-400",
 };
 
+// Maps user roles to specific Badge component visual variants
 const ROLE_VARIANT: Record<User["role"], "default" | "info" | "secondary" | "outline"> = {
   admin: "default",
   manager: "info",
@@ -20,6 +21,11 @@ const ROLE_VARIANT: Record<User["role"], "default" | "info" | "secondary" | "out
   viewer: "outline",
 };
 
+/**
+ * MemberCard Component
+ * Displays a single team member's profile information, status, and task completion stats.
+ * Animated on render using framer-motion.
+ */
 export function MemberCard({ member, index = 0 }: { member: User; index?: number }) {
   const tasks = useTaskStore((s) => s.tasks);
   
