@@ -33,7 +33,7 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
   };
 
   return (
-    <div className="flex w-80 shrink-0 flex-col rounded-2xl bg-muted/40 border border-border/60">
+    <div className="flex w-[min(82vw,20rem)] shrink-0 flex-col rounded-2xl border border-border/60 bg-muted/40 sm:w-80">
       <div className="sticky top-0 z-10 rounded-t-2xl bg-muted/40 backdrop-blur px-3.5 pb-2 pt-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
