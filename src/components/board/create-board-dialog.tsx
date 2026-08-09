@@ -20,6 +20,7 @@ const COLOR_OPTIONS = [
 
 export function CreateBoardDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const navigate = useNavigate();
+  const boards = useBoardStore((s) => s.boards);
   const createBoard = useBoardStore((s) => s.createBoard);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -45,10 +46,22 @@ export function CreateBoardDialog({ open, onOpenChange }: { open: boolean; onOpe
       return;
     }
 
+    // Check for duplicate board name (case-insensitive)
+    const isDuplicate = boards.some(
+      (b) => b.name.trim().toLowerCase() === trimmedName.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      toast.error("Board name already exists", {
+        description: "A board with this name already exists. Please choose a different name."
+      });
+      return;
+    }
+
     const id = `b${Date.now()}`;
     const board: Board = {
       id,
-      name,
+      name: trimmedName,
       description,
       workspaceId: "w1",
       columns: [
@@ -65,7 +78,7 @@ export function CreateBoardDialog({ open, onOpenChange }: { open: boolean; onOpe
       updatedAt: new Date().toISOString(),
     };
     createBoard(board);
-    toast.success("Board created", { description: name });
+    toast.success("Board created", { description: trimmedName });
     onOpenChange(false);
     setName("");
     setDescription("");

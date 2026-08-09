@@ -105,7 +105,7 @@ export function BoardCard({ board, index = 0, onRename }: { board: Board; index?
       </Card>
 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent showCloseButton={false}>
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Are you sure you want to delete this board?</DialogTitle>
             <DialogDescription>
