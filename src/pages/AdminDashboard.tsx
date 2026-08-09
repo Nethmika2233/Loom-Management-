@@ -72,10 +72,14 @@ export default function AdminDashboard() {
         <StatCard label="Total Tasks" value={tasks.length} icon={ListTodo} accent="bg-danger-50 text-danger-600 dark:bg-danger-500/10 dark:text-danger-500" delay={0.12} />
       </div>
 
+      // Admin Stat Cards Section 
+      
+
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Role Distribution</CardTitle>
+            <CardTitle>Role Distribution</CardTitle> // Role Distribution Chart 
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={240}>
@@ -166,5 +170,5 @@ export default function AdminDashboard() {
         </CardContent>
       </Card>
     </div>
-  );
+  );  // End of Admin Dashboard
 }
