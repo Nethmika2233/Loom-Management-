@@ -1,0 +1,294 @@
+{
+	"info": {
+		"_postman_id": "b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e",
+		"name": "Loom Management API",
+		"description": "REST API collection for the Loom collaborative project management application.\n\n## How to use\n1. Set the `base_url` variable if your backend runs on a different port (default: http://localhost:5000/api)\n2. Run **Auth → Login** first — the JWT token is automatically saved and used by all protected requests\n3. Test boards and tasks endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000/api"
+		},
+		{
+			"key": "token",
+			"value": ""
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"testuser@loom.io\",\n  \"password\": \"password123\",\n  \"role\": \"member\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.token) {",
+									"    pm.collectionVariables.set('token', res.token);",
+									"    console.log('Token saved to collection variable');",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"testuser@loom.io\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/verify-otp",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "verify-otp"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Boards",
+			"item": [
+{
+					"name": "Get All Boards",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/boards",
+							"host": ["{{base_url}}"],
+							"path": ["boards"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Board by ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/boards/:id",
+							"host": ["{{base_url}}"],
+							"path": ["boards", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "b1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Board",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"_id\": \"b{{$timestamp}}\",\n  \"name\": \"My New Board\",\n  \"description\": \"A board created from Postman\",\n  \"workspaceId\": \"w1\",\n  \"color\": \"from-indigo-500 to-violet-500\",\n  \"columns\": [\n    { \"id\": \"c1\", \"boardId\": \"b1\", \"title\": \"To Do\", \"order\": 0, \"color\": \"#94A3B8\" },\n    { \"id\": \"c2\", \"boardId\": \"b1\", \"title\": \"Doing\", \"order\": 1, \"color\": \"#4F46E5\" },\n    { \"id\": \"c3\", \"boardId\": \"b1\", \"title\": \"Done\", \"order\": 2, \"color\": \"#16A34A\" }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/boards",
+							"host": ["{{base_url}}"],
+							"path": ["boards"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Board",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Renamed Board\",\n  \"favorite\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/boards/:id",
+							"host": ["{{base_url}}"],
+							"path": ["boards", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "b1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Board",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{base_url}}/boards/:id",
+							"host": ["{{base_url}}"],
+							"path": ["boards", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "b1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tasks",
+			"item": [{
+"name": "Get All Tasks",
+"request": {
+"method": "GET",
+"url": { "raw": "{{base_url}}/tasks", "host": ["{{base_url}}"], "path": ["tasks"] }
+},
+"response": []
+},
+{
+"name": "Get Tasks by Board",
+"request": {
+"method": "GET",
+"url": {
+"raw": "{{base_url}}/tasks?boardId=b1",
+"host": ["{{base_url}}"],
+"path": ["tasks"],
+"query": [{ "key": "boardId", "value": "b1" }]
+}
+},
+"response": []
+},
+{
+"name": "Create Task",
+"request": {
+"method": "POST",
+"header": [{ "key": "Content-Type", "value": "application/json" }],
+"body": {
+"mode": "raw",
+"raw": "{\n  \"_id\": \"t{{$timestamp}}\",\n  \"boardId\": \"b1\",\n  \"columnId\": \"c1\",\n  \"title\": \"My test task\",\n  \"description\": \"Created from Postman\",\n  \"status\": \"todo\",\n  \"priority\": \"medium\",\n  \"assigneeIds\": [],\n  \"labelIds\": [],\n  \"checklist\": [],\n  \"comments\": [],\n  \"attachments\": [],\n  \"activity\": [],\n  \"order\": 0\n}"
+},
+"url": { "raw": "{{base_url}}/tasks", "host": ["{{base_url}}"], "path": ["tasks"] }
+},
+"response": []
+},
+{
+"name": "Update / Move Task",
+"request": {
+"method": "PUT",
+"header": [{ "key": "Content-Type", "value": "application/json" }],
+"body": { "mode": "raw", "raw": "{\n  \"status\": \"doing\",\n  \"columnId\": \"c2\",\n  \"order\": 0\n}" },
+"url": {
+"raw": "{{base_url}}/tasks/:id",
+"host": ["{{base_url}}"],
+"path": ["tasks", ":id"],
+"variable": [{ "key": "id", "value": "t1" }]
+}
+},
+"response": []
+},
+{
+"name": "Delete Task",
+"request": {
+"method": "DELETE",
+"url": {
+"raw": "{{base_url}}/tasks/:id",
+"host": ["{{base_url}}"],
+"path": ["tasks", ":id"],
+"variable": [{ "key": "id", "value": "t1" }]
+}
+},
+"response": []
+}
+]
+}
+]
+}
