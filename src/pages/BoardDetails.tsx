@@ -10,6 +10,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 import { ArrowLeft, Filter, MoreHorizontal, Star, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ export default function BoardDetails() {
   const navigate = useNavigate();
   const boards = useBoardStore((s) => s.boards);
   const toggleFavorite = useBoardStore((s) => s.toggleFavorite);
+  const updateBoard = useBoardStore((s) => s.updateBoard);
   const tasks = useTaskStore((s) => s.tasks);
   const moveTask = useTaskStore((s) => s.moveTask);
   const addTask = useTaskStore((s) => s.addTask);
@@ -59,6 +61,11 @@ export default function BoardDetails() {
       .filter((t) => (assigneeId === "all" ? true : t.assigneeIds.includes(assigneeId)));
   }, [tasks, boardId, priority, labelId, assigneeId]);
 
+  // Columns are restored from the database in their persisted order.
+  const sortedColumns = useMemo(() => {
+    return board ? [...board.columns].sort((a, b) => a.order - b.order) : [];
+  }, [board]);
+
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   if (!board) {
@@ -70,6 +77,10 @@ export default function BoardDetails() {
   }
 
   const handleDragStart = (event: DragStartEvent) => {
+    if (event.active.data.current?.type === "column") {
+      document.body.classList.add("select-none");
+      return;
+    }
     const task = boardTasks.find((t) => t.id === event.active.id);
     setActiveTask(task ?? null);
     document.body.classList.add("select-none");
@@ -80,6 +91,17 @@ export default function BoardDetails() {
     setActiveTask(null);
     document.body.classList.remove("select-none");
     if (!over) return;
+
+    if (active.data.current?.type === "column") {
+      if (active.id === over.id) return;
+      const oldIndex = sortedColumns.findIndex((c) => c.id === active.id);
+      const newIndex = sortedColumns.findIndex((c) => c.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      const reordered = arrayMove(sortedColumns, oldIndex, newIndex).map((c, i) => ({ ...c, order: i }));
+      updateBoard(board.id, { columns: reordered });
+      return;
+    }
 
     const activeTaskItem = boardTasks.find((t) => t.id === active.id);
     if (!activeTaskItem) return;
@@ -227,7 +249,7 @@ export default function BoardDetails() {
         onDragCancel={handleDragCancel}
       >
         <div className="flex min-h-0 flex-1 items-start gap-3 overflow-x-auto overscroll-x-contain scroll-smooth p-4 pb-2 sm:gap-4 sm:p-6">
-          {board.columns.map((column) => (
+          {sortedColumns.map((column) => (
             <KanbanColumn
               key={column.id}
               column={column}

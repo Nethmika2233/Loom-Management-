@@ -12,7 +12,10 @@ import type { Task } from "@/types";
 import { cn } from "@/lib/utils";
 
 export function TaskCard({ task, onClick }: { task: Task; onClick: () => void }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: task.id,
+    data: { type: "task" },
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),

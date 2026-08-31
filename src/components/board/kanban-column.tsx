@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useDroppable } from "@dnd-kit/core";
+import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { Inbox, Plus } from "lucide-react";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, Inbox, Plus } from "lucide-react";
 import { TaskCard } from "@/components/board/task-card";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,16 @@ const TITLE_MAX_LENGTH = 80;
 
 export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
+  const {
+    attributes: columnDragAttributes,
+    listeners: columnDragListeners,
+    setNodeRef: setColumnDragRef,
+    transform: columnTransform,
+    isDragging: isColumnDragging,
+  } = useDraggable({ id: column.id, data: { type: "column" } });
+  const columnStyle = {
+    transform: CSS.Translate.toString(columnTransform),
+  };
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -52,14 +63,25 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
 
   return (
     <div
+      ref={setColumnDragRef}
+      style={columnStyle}
       className={cn(
         "flex min-h-0 w-[min(82vw,20rem)] shrink-0 flex-col rounded-2xl border border-border/60 bg-muted/40 transition-all duration-200 sm:w-80",
-        isOver && "border-primary/60 ring-2 ring-primary/30"
+        isOver && "border-primary/60 ring-2 ring-primary/30",
+        isColumnDragging && "opacity-50"
       )}
     >
       <div className="sticky top-0 z-10 rounded-t-2xl bg-muted/40 backdrop-blur px-3.5 pb-2 pt-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <button
+              {...columnDragAttributes}
+              {...columnDragListeners}
+              className="cursor-grab touch-none text-muted-foreground/60 hover:text-muted-foreground active:cursor-grabbing"
+              aria-label="Drag column"
+            >
+              <GripVertical className="h-3.5 w-3.5" />
+            </button>
             <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: column.color }} />
             <h3 className="text-sm font-semibold">{column.title}</h3>
             <span
