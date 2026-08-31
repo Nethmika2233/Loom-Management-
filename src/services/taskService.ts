@@ -1,64 +1,49 @@
-import { mockTasks } from "@/mock";
+import API from "./api";
 import type { Task } from "@/types";
 
-const delay = (ms = 200) => new Promise((res) => setTimeout(res, ms));
-
-let tasks = [...mockTasks];
+// Map MongoDB doc -> frontend Task shape
+const mapTask = (t: any): Task => ({
+  ...t,
+  id: t._id ?? t.id,
+  checklist: t.checklist ?? [],
+  comments: t.comments ?? [],
+  attachments: t.attachments ?? [],
+  activity: t.activity ?? [],
+  assigneeIds: t.assigneeIds ?? [],
+  labelIds: t.labelIds ?? [],
+  order: t.order ?? 0,
+});
 
 export const taskService = {
-  async getTasksByBoard(boardId: string): Promise<Task[]> {
-    await delay();
-    return tasks.filter((t) => t.boardId === boardId);
-  },
   async getAllTasks(): Promise<Task[]> {
-    await delay();
-    return tasks;
+    const res = await API.get("/tasks");
+    return res.data.map(mapTask);
+  },
+  async getTasksByBoard(boardId: string): Promise<Task[]> {
+    const res = await API.get("/tasks", { params: { boardId } });
+    return res.data.map(mapTask);
   },
   async getTask(id: string): Promise<Task | undefined> {
-    await delay();
-    return tasks.find((t) => t.id === id);
-  },
-  async updateTask(id: string, updates: Partial<Task>): Promise<Task | undefined> {
-    await delay(100);
-    tasks = tasks.map((t) => (t.id === id ? { ...t, ...updates, updatedAt: new Date().toISOString() } : t));
-    return tasks.find((t) => t.id === id);
-  },
-  async moveTask(id: string, columnId: string, status: Task["status"]): Promise<void> {
-    await delay(80);
-    tasks = tasks.map((t) => (t.id === id ? { ...t, columnId, status, updatedAt: new Date().toISOString() } : t));
+    const res = await API.get(`/tasks/${id}`).catch(() => null);
+    return res?.data ? mapTask(res.data) : undefined;
   },
   async createTask(data: Partial<Task>): Promise<Task> {
-    await delay();
-    const newTask: Task = {
-      id: `t${Date.now()}`,
-      boardId: data.boardId!,
-      columnId: data.columnId!,
-      title: data.title ?? "Untitled task",
-      description: data.description ?? "",
-      status: data.status ?? "todo",
-      priority: data.priority ?? "medium",
-      assigneeIds: data.assigneeIds ?? [],
-      labelIds: data.labelIds ?? [],
-      checklist: [],
-      comments: [],
-      attachments: [],
-      activity: [
-        {
-          id: `act-${Date.now()}`,
-          actorId: "u1",
-          action: "created this task",
-          createdAt: new Date().toISOString(),
-        },
-      ],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      order: tasks.length,
-    };
-    tasks = [...tasks, newTask];
-    return newTask;
+    const id = data.id ?? `t${Date.now()}`;
+    const payload: Record<string, unknown> = { ...data, _id: id };
+    delete payload.id;
+    const res = await API.post("/tasks", payload);
+    return mapTask(res.data);
+  },
+  async updateTask(id: string, updates: Partial<Task>): Promise<Task | undefined> {
+    const payload = { ...updates };
+    delete (payload as { id?: string }).id;
+    const res = await API.put(`/tasks/${id}`, payload);
+    return mapTask(res.data);
+  },
+  async moveTask(id: string, columnId: string, status: Task["status"], order?: number): Promise<void> {
+    await API.put(`/tasks/${id}`, { columnId, status, ...(order !== undefined ? { order } : {}) });
   },
   async deleteTask(id: string): Promise<void> {
-    await delay();
-    tasks = tasks.filter((t) => t.id !== id);
+    await API.delete(`/tasks/${id}`);
   },
 };
