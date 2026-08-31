@@ -56,7 +56,11 @@ export function TaskCard({ task, onClick }: { task: Task; onClick: () => void })
           </div>
 
           <p className="mt-2 text-sm font-medium leading-snug">{task.title}</p>
-          {task.description && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{task.description}</p>}
+          {task.description ? (
+            <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{task.description}</p>
+          ) : (
+            <p className="mt-1 text-xs italic text-muted-foreground/60">No description</p>
+          )}
 
           {checklistTotal > 0 && (
             <div className="mt-2.5 space-y-1">
