@@ -72,11 +72,13 @@ export default function BoardDetails() {
   const handleDragStart = (event: DragStartEvent) => {
     const task = boardTasks.find((t) => t.id === event.active.id);
     setActiveTask(task ?? null);
+    document.body.classList.add("select-none");
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveTask(null);
+    document.body.classList.remove("select-none");
     if (!over) return;
 
     const activeTaskItem = boardTasks.find((t) => t.id === active.id);
@@ -94,6 +96,11 @@ export default function BoardDetails() {
 
     moveTask(activeTaskItem.id, targetColumnId, statusMap[targetColumnId] ?? activeTaskItem.status, 0);
     toast.success(`Moved to ${board.columns.find((c) => c.id === targetColumnId)?.title}`);
+  };
+
+  const handleDragCancel = () => {
+    setActiveTask(null);
+    document.body.classList.remove("select-none");
   };
 
   const handleAddTask = (columnId: string, title: string) => {
@@ -212,7 +219,13 @@ export default function BoardDetails() {
         </div>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
         <div className="flex min-h-0 flex-1 items-start gap-3 overflow-x-auto overscroll-x-contain scroll-smooth p-4 pb-2 sm:gap-4 sm:p-6">
           {board.columns.map((column) => (
             <KanbanColumn

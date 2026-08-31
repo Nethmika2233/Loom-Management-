@@ -24,7 +24,7 @@ export function TaskCard({ task, onClick }: { task: Task; onClick: () => void })
   const labels = task.labelIds.map((id) => mockLabels.find((l) => l.id === id)).filter(Boolean) as (typeof mockLabels)[number][];
 
   return (
-    <div ref={setNodeRef} style={style} className={cn(isDragging && "opacity-40 z-50")}>
+    <div ref={setNodeRef} style={style} className={cn(isDragging && "z-50 select-none opacity-40")}>
       <motion.div layout whileHover={{ y: -2 }} transition={{ duration: 0.15 }}>
         <Card
           onClick={onClick}
