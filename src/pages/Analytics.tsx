@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Award, CheckCircle2, TrendingUp, Zap, Download, Calendar, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -45,9 +45,25 @@ const chartFallback = (
   </div>
 );
 
+// --- NEW SKELETON COMPONENT ---
+const ChartSkeleton = () => (
+  <div className="h-[260px] w-full animate-pulse rounded-md bg-slate-200"></div>
+);
+
 export default function Analytics() {
   const tasks = useTaskStore((s) => s.tasks);
   const [timeRange, setTimeRange] = useState("30d");
+  
+  // --- NEW LOADING STATE ---
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulate API fetch delay so skeletons are visible on page load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1200); // 1.2 seconds of loading
+    return () => clearTimeout(timer);
+  }, []);
 
   // Memoized calculations to optimize rendering performance
   const { totalTasks, completedTasks, completionRate } = useMemo(() => {
@@ -104,7 +120,6 @@ export default function Analytics() {
             </select>
           </div>
 
-
           <button className="flex items-center gap-2 rounded-md bg-[#141e30] px-5 py-2 text-sm font-semibold text-[#D4AF37] hover:bg-[#243b55] hover:text-white transition-all shadow-md focus:ring-2 focus:ring-[#D4AF37] focus:outline-none">
             <Download className="h-4 w-4" />
             Download Data
@@ -154,7 +169,7 @@ export default function Analytics() {
           </CardHeader>
           <CardContent className="pt-4">
             <ChartErrorBoundary fallback={chartFallback}>
-              <ProjectProgressChart />
+              {isLoading ? <ChartSkeleton /> : <ProjectProgressChart />}
             </ChartErrorBoundary>
           </CardContent>
         </Card>
@@ -166,7 +181,7 @@ export default function Analytics() {
           </CardHeader>
           <CardContent className="pt-4">
             <ChartErrorBoundary fallback={chartFallback}>
-              <TaskStatusPieChart />
+               {isLoading ? <ChartSkeleton /> : <TaskStatusPieChart />}
             </ChartErrorBoundary>
           </CardContent>
         </Card>
@@ -180,7 +195,7 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <ChartErrorBoundary fallback={chartFallback}>
-              <CompletionRateChart />
+               {isLoading ? <ChartSkeleton /> : <CompletionRateChart />}
             </ChartErrorBoundary>
           </CardContent>
         </Card>
@@ -191,7 +206,7 @@ export default function Analytics() {
           </CardHeader>
           <CardContent>
             <ChartErrorBoundary fallback={chartFallback}>
-              <WeeklyProductivityChart />
+               {isLoading ? <ChartSkeleton /> : <WeeklyProductivityChart />}
             </ChartErrorBoundary>
           </CardContent>
         </Card>
@@ -210,7 +225,7 @@ export default function Analytics() {
           </CardHeader>
           <CardContent className="pt-6">
             <ChartErrorBoundary fallback={chartFallback}>
-              <MemberActivityChart />
+               {isLoading ? <ChartSkeleton /> : <MemberActivityChart />}
             </ChartErrorBoundary>
           </CardContent>
         </Card>
