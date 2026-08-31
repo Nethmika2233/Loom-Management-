@@ -30,31 +30,36 @@ export function CreateBoardDialog({ open, onOpenChange }: { open: boolean; onOpe
       toast.error("Board name is required");
       return;
     }
-    const id = `b${Date.now()}`;
-    const board: Board = {
-      id,
-      name,
-      description,
-      workspaceId: "w1",
-      columns: [
-        { id: `${id}-c1`, boardId: id, title: "To Do", order: 0, color: "#94A3B8" },
-        { id: `${id}-c2`, boardId: id, title: "Doing", order: 1, color: "#4F46E5" },
-        { id: `${id}-c3`, boardId: id, title: "Review", order: 2, color: "#F97316" },
-        { id: `${id}-c4`, boardId: id, title: "Done", order: 3, color: "#16A34A" },
-      ],
-      memberIds: ["u1"],
-      favorite: false,
-      archived: false,
-      color,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    createBoard(board);
-    toast.success("Board created", { description: name });
-    onOpenChange(false);
-    setName("");
-    setDescription("");
-    navigate(`/boards/${id}`);
+    try {
+      const id = `b${Date.now()}`;
+      const board: Board = {
+        id,
+        name,
+        description,
+        workspaceId: "w1",
+        columns: [
+          { id: `${id}-c1`, boardId: id, title: "To Do", order: 0, color: "#94A3B8" },
+          { id: `${id}-c2`, boardId: id, title: "Doing", order: 1, color: "#4F46E5" },
+          { id: `${id}-c3`, boardId: id, title: "Review", order: 2, color: "#F97316" },
+          { id: `${id}-c4`, boardId: id, title: "Done", order: 3, color: "#16A34A" },
+        ],
+        memberIds: [],
+        favorite: false,
+        archived: false,
+        color,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      createBoard(board);
+      toast.success("Board created", { description: name });
+      onOpenChange(false);
+      setName("");
+      setDescription("");
+      navigate(`/boards/${id}`);
+    } catch (error) {
+      console.error("Failed to create board:", error);
+      toast.error("Failed to create board", { description: error instanceof Error ? error.message : "Unknown error" });
+    }
   };
 
   return (
