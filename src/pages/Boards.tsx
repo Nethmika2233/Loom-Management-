@@ -22,7 +22,14 @@ export default function Boards() {
     return boards
       .filter((b) => (tab === "archived" ? b.archived : !b.archived))
       .filter((b) => (tab === "favorites" ? b.favorite : true))
-      .filter((b) => b.name.toLowerCase().includes(query.toLowerCase()));
+      .filter((b) => b.name.toLowerCase().includes(query.toLowerCase()))
+      .sort((a, b) => {
+        if (tab === "all") {
+          if (a.favorite && !b.favorite) return -1;
+          if (!a.favorite && b.favorite) return 1;
+        }
+        return 0;
+      });
   }, [boards, tab, query]);
 
   return (
