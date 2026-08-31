@@ -64,8 +64,16 @@ export default function Boards() {
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={Trello}
-          title="No boards found"
-          description={tab === "archived" ? "You haven't archived any boards yet." : "Create your first board to start organizing tasks."}
+          title={query ? "No matching boards" : "No boards found"}
+          description={
+            query
+              ? `No boards matched "${query}". Try searching for something else.`
+              : tab === "archived"
+              ? "You haven't archived any boards yet."
+              : tab === "favorites"
+              ? "You haven't starred any favorite boards yet."
+              : "No boards exist yet. Create your first board to start organizing tasks."
+          }
           action={
             tab !== "archived" && (
               <Button onClick={() => setCreateOpen(true)}>
