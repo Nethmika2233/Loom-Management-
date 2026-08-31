@@ -420,33 +420,32 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
               </div>
             </div>
 
-            {confirmingDelete ? (
-              <div className="space-y-1.5">
-                <p className="text-xs text-muted-foreground">Delete this task? This can't be undone.</p>
-                <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1" onClick={() => setConfirmingDelete(false)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1 text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-500/10"
-                    onClick={handleDelete}
-                  >
-                    <Trash2 className="h-4 w-4" /> Confirm
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <Button
-                variant="outline"
-                className="w-full text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-500/10"
-                onClick={() => setConfirmingDelete(true)}
-              >
-                <Trash2 className="h-4 w-4" /> Delete task
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              className="w-full text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-500/10"
+              onClick={() => setConfirmingDelete(true)}
+            >
+              <Trash2 className="h-4 w-4" /> Delete task
+            </Button>
           </div>
         </div>
+
+        <Dialog open={confirmingDelete} onOpenChange={setConfirmingDelete}>
+          <DialogContent className="max-w-sm">
+            <DialogTitle>Delete task?</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              This will permanently delete &ldquo;{task.title}&rdquo;. This action can&apos;t be undone.
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setConfirmingDelete(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDelete}>
+                <Trash2 className="h-4 w-4" /> Delete task
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );
