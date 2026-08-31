@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Award, CheckCircle2, TrendingUp, Zap, Download, Calendar, Filter } from "lucide-react";
+import { Award, CheckCircle2, TrendingUp, Zap, Download, Calendar, Filter, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ProjectProgressChart } from "@/components/charts/project-progress-chart";
@@ -101,9 +101,10 @@ export default function Analytics() {
   const [timeRange, setTimeRange] = useState("30d");
   
   const [isLoading, setIsLoading] = useState(true);
-  
-  // --- NEW: DOWNLOAD BUTTON STATE ---
   const [isDownloading, setIsDownloading] = useState(false);
+  
+  // --- NEW: REFRESH STATE ---
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -112,13 +113,22 @@ export default function Analytics() {
     return () => clearTimeout(timer);
   }, []);
 
-  // --- NEW: DOWNLOAD HANDLER ---
   const handleDownload = () => {
     setIsDownloading(true);
-    // Simulate a network request, then reset button after 2 seconds
     setTimeout(() => {
       setIsDownloading(false);
     }, 2000);
+  };
+
+  // --- NEW: REFRESH HANDLER ---
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setIsLoading(true); // Trigger the skeletons again!
+    
+    setTimeout(() => {
+      setIsRefreshing(false);
+      setIsLoading(false);
+    }, 1200);
   };
 
   const { totalTasks, completedTasks, completionRate } = useMemo(() => {
@@ -161,6 +171,17 @@ export default function Analytics() {
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-0">
+          
+          {/* NEW REFRESH BUTTON */}
+          <button 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 text-slate-600 shadow-sm hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+            title="Refresh Data"
+          >
+            <RefreshCw className={`h-5 w-5 ${isRefreshing ? "animate-spin text-[#4F46E5]" : ""}`} />
+          </button>
+
           <div className="flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm hover:bg-slate-100 transition-colors cursor-pointer">
             <Calendar className="h-4 w-4 text-[#243b55]" />
             <select
@@ -174,7 +195,6 @@ export default function Analytics() {
             </select>
           </div>
 
-          {/* UPDATED DOWNLOAD BUTTON */}
           <button 
             onClick={handleDownload}
             disabled={isDownloading}
