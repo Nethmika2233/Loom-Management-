@@ -51,7 +51,12 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
   };
 
   return (
-    <div className="flex min-h-0 w-[min(82vw,20rem)] shrink-0 flex-col rounded-2xl border border-border/60 bg-muted/40 sm:w-80">
+    <div
+      className={cn(
+        "flex min-h-0 w-[min(82vw,20rem)] shrink-0 flex-col rounded-2xl border border-border/60 bg-muted/40 transition-all duration-200 sm:w-80",
+        isOver && "border-primary/60 ring-2 ring-primary/30"
+      )}
+    >
       <div className="sticky top-0 z-10 rounded-t-2xl bg-muted/40 backdrop-blur px-3.5 pb-2 pt-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -72,7 +77,7 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
         ref={setNodeRef}
         className={cn(
           "flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto rounded-b-2xl px-3.5 pb-3.5 pt-1 min-h-[120px] transition-all duration-200",
-          isOver && "border border-dashed border-primary/60 bg-primary/5 shadow-inner shadow-primary/10"
+          isOver && "bg-primary/5 shadow-inner shadow-primary/10"
         )}
       >
         {tasks.length === 0 && !adding ? (
