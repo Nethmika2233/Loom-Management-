@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Award, CheckCircle2, TrendingUp, Zap, Download, Calendar, Filter, RefreshCw, AlertCircle, Clock, CheckCircle } from "lucide-react";
+import { Award, CheckCircle2, TrendingUp, Zap, Download, Calendar, Filter, RefreshCw, AlertCircle, Clock, CheckCircle, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ProjectProgressChart } from "@/components/charts/project-progress-chart";
@@ -163,6 +163,18 @@ export default function Analytics() {
     };
   }, [tasks]);
 
+  // --- NEW: SMART INSIGHT LOGIC ---
+  const getSmartInsight = () => {
+    if (totalTasks === 0) return "Start assigning tasks to your team to generate real-time analytics and insights.";
+    if (priorityBreakdown.high > 5 && completionRate < 50) {
+      return "Attention: High-priority tasks are accumulating while completion rates are low. Consider reallocating team bandwidth.";
+    }
+    if (completionRate > 75) {
+      return "Outstanding performance! Your team is clearing tasks highly efficiently. Keep up the great momentum.";
+    }
+    return `Steady progress. You currently have ${statusBreakdown.inProgress} active tasks in the pipeline. Keep pushing forward!`;
+  };
+
   const animatedCompletionRate = useCountUp(completionRate);
   const animatedProductivity = useCountUp(tasks.length ? completionRate : 0);
   const animatedCompletedTasks = useCountUp(completedTasks);
@@ -231,6 +243,17 @@ export default function Analytics() {
             {isDownloading ? <CheckCircle2 className="h-4 w-4" /> : <Download className="h-4 w-4" />}
             {isDownloading ? "Exported!" : "Download Data"}
           </button>
+        </div>
+      </motion.div>
+
+      {/* --- NEW: SMART INSIGHTS BANNER --- */}
+      <motion.div variants={itemVariants} className="bg-gradient-to-r from-[#141e30] to-[#243b55] rounded-xl p-4 shadow-md flex items-center gap-4 text-white">
+        <div className="bg-[#D4AF37]/20 p-2.5 rounded-lg border border-[#D4AF37]/30">
+          <Sparkles className="h-6 w-6 text-[#D4AF37]" />
+        </div>
+        <div>
+          <h4 className="text-sm font-bold text-[#D4AF37] uppercase tracking-wider mb-0.5">Smart Insight</h4>
+          <p className="text-sm text-slate-200">{getSmartInsight()}</p>
         </div>
       </motion.div>
 
