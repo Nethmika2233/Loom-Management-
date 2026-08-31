@@ -28,6 +28,7 @@ export function MonthView({ month, tasks, onTaskClick, onDayClick, selectedDay }
 
   return (
     <div className="overflow-hidden rounded-2xl border border-border">
+      <div className="min-w-[700px]">
       <div className="grid grid-cols-7 border-b border-border bg-muted/50">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
           <div key={d} className="px-2 py-2 text-center text-xs font-semibold text-muted-foreground">
@@ -48,14 +49,24 @@ export function MonthView({ month, tasks, onTaskClick, onDayClick, selectedDay }
                 selectedDay && isSameDay(day, selectedDay) && "bg-primary-50 ring-1 ring-inset ring-primary-300 dark:bg-primary-500/10"
               )}
             >
-              <span
-                className={cn(
-                  "inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium",
-                  isToday(day) && "bg-primary-600 text-white"
+              <div className="flex items-center justify-between">
+                <span
+                  className={cn(
+                    "inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium",
+                    isToday(day) && "bg-primary-600 text-white"
+                  )}
+                >
+                  {format(day, "d")}
+                </span>
+
+                {/* TASK 3 ADDITION: Task count badge */}
+                {dayTasks.length > 0 && (
+                  <span className="rounded-full bg-primary-100 px-1.5 py-0.5 text-[10px] font-bold text-primary-700 dark:bg-primary-950 dark:text-primary-300">
+                    {dayTasks.length}
+                  </span>
                 )}
-              >
-                {format(day, "d")}
-              </span>
+              </div>
+
               <div className="mt-1 space-y-1">
                 {dayTasks.slice(0, 3).map((task) => (
                   <button
@@ -71,6 +82,7 @@ export function MonthView({ month, tasks, onTaskClick, onDayClick, selectedDay }
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

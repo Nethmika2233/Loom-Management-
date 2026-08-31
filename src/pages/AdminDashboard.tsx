@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { ListTodo, ShieldCheck, Trello, UserCheck, Users } from "lucide-react";
+import { ListTodo, ShieldCheck, Trello, UserCheck, Users, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -37,6 +37,7 @@ export default function AdminDashboard() {
   const tasks = useTaskStore((s) => s.tasks);
   const boards = useBoardStore((s) => s.boards);
   const [members, setMembers] = useState<User[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     teamService.getMembers().then(setMembers);
@@ -56,6 +57,14 @@ export default function AdminDashboard() {
       color: ROLE_COLORS[role as User["role"]],
     }));
   }, [members]);
+
+  const filteredMembers = useMemo(() => {
+    return members.filter(
+      (u) =>
+        u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.email.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [members, searchQuery]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
@@ -77,14 +86,10 @@ export default function AdminDashboard() {
         <StatCard label="Total Tasks" value={tasks.length} icon={ListTodo} accent="bg-danger-50 text-danger-600 dark:bg-danger-500/10 dark:text-danger-500" delay={0.12} />
       </div>
 
-      // Admin Stat Cards Section 
-      
-
-
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Role Distribution</CardTitle> // Role Distribution Chart 
+            <CardTitle>Role Distribution</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={240}>
@@ -112,10 +117,20 @@ export default function AdminDashboard() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle>User Management</CardTitle>
+          <div className="relative w-64">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-9 w-full rounded-md border border-input bg-transparent pl-9 pr-3 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            />
+          </div>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0">     
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -128,14 +143,14 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {members.length === 0 ? (
+                {filteredMembers.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-4 py-8 text-center text-sm text-muted-foreground">
                       No users yet. Invite team members to get started.
                     </td>
                   </tr>
                 ) : (
-                  members.map((u) => (
+                  filteredMembers.map((u) => (
                     <tr key={u.id} className="border-b border-border last:border-0 hover:bg-muted/50">
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-2.5">
@@ -169,5 +184,5 @@ export default function AdminDashboard() {
         </CardContent>
       </Card>
     </div>
-  );  // End of Admin Dashboard
+  );
 }
