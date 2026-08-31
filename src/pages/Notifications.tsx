@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Bell, CheckCheck, Mail, MailOpen, Search } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -28,6 +29,11 @@ export default function Notifications() {
   const markAsUnread = useNotificationStore((s) => s.markAsUnread);
   const markAllAsRead = useNotificationStore((s) => s.markAllAsRead);
 
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead();
+    toast.success("All notifications marked as read");
+  };
+
   const filteredNotifications = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
@@ -51,7 +57,7 @@ export default function Notifications() {
           <h1 className="text-2xl font-bold tracking-tight">Notifications</h1>
           <p className="text-sm text-muted-foreground">Stay up to date with your team's activity.</p>
         </div>
-        <Button variant="outline" size="sm" onClick={markAllAsRead} disabled={unread === 0}>
+        <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} disabled={unread === 0}>
           <CheckCheck className="h-4 w-4" /> Mark all as read
         </Button>
       </div>

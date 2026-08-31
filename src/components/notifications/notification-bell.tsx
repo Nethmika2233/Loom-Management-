@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Bell, CheckCheck, Inbox } from "lucide-react";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,11 @@ export function NotificationBell() {
   const markAsRead = useNotificationStore((s) => s.markAsRead);
   const markAllAsRead = useNotificationStore((s) => s.markAllAsRead);
   const previewNotifications = notifications.slice(0, 6);
+
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead();
+    toast.success("All notifications marked as read");
+  };
 
   return (
     <DropdownMenu>
@@ -41,7 +47,7 @@ export function NotificationBell() {
             </p>
           </div>
           {unread > 0 && (
-            <Button variant="ghost" size="sm" onClick={markAllAsRead}>
+            <Button variant="ghost" size="sm" onClick={handleMarkAllAsRead}>
               <CheckCheck className="h-4 w-4" /> Read all
             </Button>
           )}
