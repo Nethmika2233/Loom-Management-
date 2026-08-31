@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Search, UserPlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MemberCard } from "@/components/team/member-card";
 import { InviteMemberDialog } from "@/components/team/invite-member-dialog";
@@ -15,6 +16,7 @@ export default function Team() {
   const [department, setDepartment] = useState("all");
   const [inviteOpen, setInviteOpen] = useState(false);
   const [members, setMembers] = useState<User[]>([]);
+  const [memberToRemove, setMemberToRemove] = useState<User | null>(null);
 
   useEffect(() => {
     teamService.getMembers().then(setMembers);
@@ -65,12 +67,38 @@ export default function Team() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((member, i) => (
-            <MemberCard key={member.id} member={member} index={i} />
+            <MemberCard key={member.id} member={member} index={i} onRemove={() => setMemberToRemove(member)} />
           ))}
         </div>
       )}
 
       <InviteMemberDialog open={inviteOpen} onOpenChange={setInviteOpen} />
+
+      <Dialog open={Boolean(memberToRemove)} onOpenChange={(open) => !open && setMemberToRemove(null)}>
+        <DialogContent className="max-w-md bg-white p-6 text-slate-900">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-slate-900">Remove Member</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-slate-600">
+            Are you sure you want to remove <span className="font-medium text-slate-900">{memberToRemove?.name ?? "this member"}</span> from the team? This action cannot be undone.
+          </p>
+          <DialogFooter className="sm:justify-end">
+            <Button variant="outline" onClick={() => setMemberToRemove(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (!memberToRemove) return;
+                setMembers((current) => current.filter((member) => member.id !== memberToRemove.id));
+                setMemberToRemove(null);
+              }}
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
