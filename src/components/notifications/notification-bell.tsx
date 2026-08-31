@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { Bell, CheckCheck, Inbox } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNotificationStore } from "@/store/notificationStore";
 import { NotificationIcon } from "@/components/notifications/notification-icon";
+import { formatNotificationTime } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
 
 export function NotificationBell() {
@@ -76,7 +76,7 @@ export function NotificationBell() {
                     </div>
                     <p className="line-clamp-2 text-xs text-muted-foreground">{notification.description}</p>
                     <p className="mt-1 text-[11px] text-muted-foreground">
-                      {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                      {formatNotificationTime(notification.createdAt)}
                     </p>
                   </div>
                 </Link>

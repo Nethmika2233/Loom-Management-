@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
 import { Bell, CheckCheck, Mail, MailOpen, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/common/empty-state";
 import { NotificationIcon } from "@/components/notifications/notification-icon";
 import { useNotificationStore } from "@/store/notificationStore";
+import { formatNotificationTime } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
 
 type Filter = "all" | "unread" | "read";
@@ -118,7 +118,7 @@ export default function Notifications() {
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">{notification.description}</p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                  {formatNotificationTime(notification.createdAt)}
                 </p>
               </Link>
               <Button
