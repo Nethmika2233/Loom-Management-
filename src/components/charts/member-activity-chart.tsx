@@ -1,10 +1,32 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { memberActivity } from "@/mock/analytics";
+import { useTaskStore } from "@/store/taskStore";
+import { useUserStore } from "@/store/userStore";
 
 export function MemberActivityChart() {
+  const tasks = useTaskStore((s) => s.tasks);
+  const currentUser = useUserStore((s) => s.user);
+
+  // Build chart data from actual tasks
+  const data = currentUser
+    ? [
+        {
+          name: currentUser.name.split(" ")[0],
+          tasks: tasks.filter((t) => (t.assigneeIds || []).includes(currentUser.id)).length,
+        },
+      ]
+    : [];
+
+  if (data.length === 0) {
+    return (
+      <div className="flex h-[260px] items-center justify-center text-sm text-muted-foreground">
+        No activity data yet. Create tasks to see your activity chart.
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={memberActivity} margin={{ top: 8, right: 12, left: -20, bottom: 0 }}>
+      <BarChart data={data} margin={{ top: 8, right: 12, left: -20, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
         <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} angle={-15} textAnchor="end" height={50} />
         <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
