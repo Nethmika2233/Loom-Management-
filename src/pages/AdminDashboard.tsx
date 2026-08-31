@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { ListTodo, ShieldCheck, Trello, UserCheck, Users, Search } from "lucide-react";
+import { ListTodo, ShieldCheck, Trello, UserCheck, Users, Search, UserX } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -176,8 +176,18 @@ export default function AdminDashboard() {
               <tbody>
                 {filteredMembers.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-sm text-muted-foreground">
-                      No users yet. Invite team members to get started.
+                    <td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <UserX className="h-8 w-8 text-muted-foreground/60" />
+                        <p className="font-medium text-foreground">
+                          {members.length === 0 ? "No users yet." : "No matching users found"}
+                        </p>
+                        <p className="text-xs">
+                          {members.length === 0
+                            ? "Invite team members to get started."
+                            : "Try adjusting your search query or role filter."}
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 ) : (
