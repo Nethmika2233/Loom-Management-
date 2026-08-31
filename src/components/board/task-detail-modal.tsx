@@ -30,7 +30,7 @@ import { useTaskStore } from "@/store/taskStore";
 import { useUserStore } from "@/store/userStore";
 import { teamService } from "@/services/teamService";
 import { STATUS_CONFIG } from "@/constants";
-import { getInitials, cn } from "@/lib/utils";
+import { getInitials, cn, formatRelativeTimeShort } from "@/lib/utils";
 import type { Task, TaskStatus, Priority, User } from "@/types";
 
 export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onOpenChange: (open: boolean) => void }) {
@@ -214,8 +214,8 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
                       <div className="min-w-0 flex-1 rounded-xl bg-muted/60 px-3 py-2">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold">{author?.name}</span>
-                          <span className="text-[10px] text-muted-foreground">
-                            {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                          <span className="text-[10px] text-muted-foreground" title={new Date(comment.createdAt).toLocaleString()}>
+                            {formatRelativeTimeShort(comment.createdAt)}
                           </span>
                         </div>
                         <p className="mt-0.5 text-sm">{comment.content}</p>
