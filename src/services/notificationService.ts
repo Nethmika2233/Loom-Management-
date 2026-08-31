@@ -1,8 +1,9 @@
 import type { AppNotification } from "@/types";
+import { mockNotifications } from "@/mock/notifications";
 
 const delay = (ms = 200) => new Promise((res) => setTimeout(res, ms));
 
-let notifications: AppNotification[] = [];
+let notifications: AppNotification[] = [...mockNotifications];
 
 export const notificationService = {
   async getNotifications(): Promise<AppNotification[]> {

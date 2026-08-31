@@ -1,23 +1,27 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
 import { Bell, CheckCheck, Mail, MailOpen, Search } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/common/empty-state";
 import { NotificationIcon } from "@/components/notifications/notification-icon";
 import { useNotificationStore } from "@/store/notificationStore";
+import { formatNotificationTime, groupNotificationsByDay } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
+import type { AppNotification } from "@/types";
 
-type Filter = "all" | "unread" | "read";
+type Filter = "all" | "unread";
 
 const FILTERS: { label: string; value: Filter }[] = [
   { label: "All", value: "all" },
   { label: "Unread", value: "unread" },
-  { label: "Read", value: "read" },
 ];
+
+const DAY_GROUPS = ["Today", "Yesterday", "Earlier"];
 
 export default function Notifications() {
   const [filter, setFilter] = useState<Filter>("all");
@@ -28,12 +32,22 @@ export default function Notifications() {
   const markAsUnread = useNotificationStore((s) => s.markAsUnread);
   const markAllAsRead = useNotificationStore((s) => s.markAllAsRead);
 
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead();
+    toast.success("All notifications marked as read");
+  };
+
+  const handleNotificationOpen = (notification: AppNotification) => {
+    if (!notification.read) {
+      void markAsRead(notification.id);
+    }
+  };
+
   const filteredNotifications = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
     return notifications.filter((notification) => {
-      const matchesFilter =
-        filter === "all" || (filter === "unread" && !notification.read) || (filter === "read" && notification.read);
+      const matchesFilter = filter === "all" || !notification.read;
       const matchesSearch =
         !normalizedQuery ||
         `${notification.title} ${notification.description}`.toLowerCase().includes(normalizedQuery);
@@ -43,6 +57,7 @@ export default function Notifications() {
   }, [filter, notifications, query]);
 
   const read = notifications.length - unread;
+  const groupedNotifications = groupNotificationsByDay(filteredNotifications);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
@@ -51,7 +66,7 @@ export default function Notifications() {
           <h1 className="text-2xl font-bold tracking-tight">Notifications</h1>
           <p className="text-sm text-muted-foreground">Stay up to date with your team's activity.</p>
         </div>
-        <Button variant="outline" size="sm" onClick={markAllAsRead} disabled={unread === 0}>
+        <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} disabled={unread === 0}>
           <CheckCheck className="h-4 w-4" /> Mark all as read
         </Button>
       </div>
@@ -82,18 +97,15 @@ export default function Notifications() {
             onChange={(event) => setQuery(event.target.value)}
           />
         </div>
-        <div className="flex gap-2">
-          {FILTERS.map((item) => (
-            <Button
-              key={item.value}
-              variant={filter === item.value ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter(item.value)}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </div>
+        <Tabs value={filter} onValueChange={(value) => setFilter(value as Filter)}>
+          <TabsList className="grid w-full grid-cols-2 sm:w-auto">
+            {FILTERS.map((item) => (
+              <TabsTrigger key={item.value} value={item.value}>
+                {item.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
       {notifications.length === 0 ? (
@@ -101,39 +113,62 @@ export default function Notifications() {
       ) : filteredNotifications.length === 0 ? (
         <EmptyState icon={Search} title="No matching notifications" description="Try another search or filter." />
       ) : (
-        <Card className="divide-y divide-border overflow-hidden">
-          {filteredNotifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={cn(
-                "group flex items-start gap-3 p-4 transition-colors hover:bg-muted/50",
-                !notification.read && "bg-primary-50/50 dark:bg-primary-500/5"
-              )}
-            >
-              <NotificationIcon type={notification.type} />
-              <Link to={notification.link ?? "#"} onClick={() => markAsRead(notification.id)} className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-semibold">{notification.title}</p>
-                  {!notification.read && <Badge variant="info">New</Badge>}
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">{notification.description}</p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-                </p>
-              </Link>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  notification.read ? markAsUnread(notification.id) : markAsRead(notification.id)
-                }
-              >
-                {notification.read ? <Mail className="h-4 w-4" /> : <MailOpen className="h-4 w-4" />}
-                {notification.read ? "Unread" : "Read"}
-              </Button>
-            </div>
-          ))}
-        </Card>
+        <div className="space-y-5">
+          {DAY_GROUPS.map((group) => {
+            const groupNotifications = groupedNotifications[group] ?? [];
+
+            if (groupNotifications.length === 0) {
+              return null;
+            }
+
+            return (
+              <section key={group} className="space-y-2">
+                <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group}</h2>
+                <Card className="divide-y divide-border overflow-hidden">
+                  {groupNotifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={cn(
+                        "group flex items-start gap-3 border-l-4 border-transparent p-4 transition-colors hover:bg-muted/50",
+                        !notification.read && "border-primary-600 bg-primary-50/70 shadow-sm dark:bg-primary-500/10"
+                      )}
+                    >
+                      <NotificationIcon type={notification.type} />
+                      <Link
+                        to={notification.link ?? "#"}
+                        onClick={() => handleNotificationOpen(notification)}
+                        className="min-w-0 flex-1"
+                      >
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-semibold">{notification.title}</p>
+                          {!notification.read && (
+                            <>
+                              <span className="h-2 w-2 rounded-full bg-primary-600 ring-2 ring-primary-100 dark:ring-primary-500/20" />
+                              <Badge variant="info">New</Badge>
+                            </>
+                          )}
+                        </div>
+                        <p className="mt-1 text-sm text-muted-foreground">{notification.description}</p>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {formatNotificationTime(notification.createdAt)}
+                        </p>
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`Mark ${notification.title} as ${notification.read ? "unread" : "read"}`}
+                        onClick={() => (notification.read ? markAsUnread(notification.id) : markAsRead(notification.id))}
+                      >
+                        {notification.read ? <Mail className="h-4 w-4" /> : <MailOpen className="h-4 w-4" />}
+                        {notification.read ? "Unread" : "Read"}
+                      </Button>
+                    </div>
+                  ))}
+                </Card>
+              </section>
+            );
+          })}
+        </div>
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { Bell, CheckCheck } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { Bell, CheckCheck, Inbox } from "lucide-react";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNotificationStore } from "@/store/notificationStore";
 import { NotificationIcon } from "@/components/notifications/notification-icon";
+import { formatNotificationTime } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
+import type { AppNotification } from "@/types";
 
 export function NotificationBell() {
   const notifications = useNotificationStore((s) => s.notifications);
@@ -19,6 +21,17 @@ export function NotificationBell() {
   const markAsRead = useNotificationStore((s) => s.markAsRead);
   const markAllAsRead = useNotificationStore((s) => s.markAllAsRead);
   const previewNotifications = notifications.slice(0, 6);
+
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead();
+    toast.success("All notifications marked as read");
+  };
+
+  const handleNotificationOpen = (notification: AppNotification) => {
+    if (!notification.read) {
+      void markAsRead(notification.id);
+    }
+  };
 
   return (
     <DropdownMenu>
@@ -41,7 +54,7 @@ export function NotificationBell() {
             </p>
           </div>
           {unread > 0 && (
-            <Button variant="ghost" size="sm" onClick={markAllAsRead}>
+            <Button variant="ghost" size="sm" onClick={handleMarkAllAsRead}>
               <CheckCheck className="h-4 w-4" /> Read all
             </Button>
           )}
@@ -49,30 +62,39 @@ export function NotificationBell() {
 
         <div className="max-h-96 overflow-y-auto">
           {previewNotifications.length === 0 ? (
-            <div className="px-4 py-8 text-center">
-              <Bell className="mx-auto h-8 w-8 text-muted-foreground" />
+            <div className="px-4 py-10 text-center">
+              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-muted">
+                <Inbox className="h-5 w-5 text-muted-foreground" />
+              </div>
               <p className="mt-3 text-sm font-medium">No notifications yet</p>
-              <p className="text-xs text-muted-foreground">New task updates will appear here.</p>
+              <p className="mx-auto mt-1 max-w-52 text-xs text-muted-foreground">
+                Assignment updates, mentions, and reminders will appear here.
+              </p>
             </div>
           ) : (
             previewNotifications.map((notification) => (
-              <DropdownMenuItem key={notification.id} asChild onClick={() => markAsRead(notification.id)}>
+              <DropdownMenuItem key={notification.id} asChild>
                 <Link
                   to={notification.link ?? "#"}
+                  onClick={() => handleNotificationOpen(notification)}
                   className={cn(
-                    "flex items-start gap-3 px-3 py-3",
-                    !notification.read && "bg-primary-50/50 dark:bg-primary-500/5"
+                    "flex items-start gap-3 border-l-2 border-transparent px-3 py-3",
+                    !notification.read && "border-primary-600 bg-primary-50/70 dark:bg-primary-500/10"
                   )}
                 >
                   <NotificationIcon type={notification.type} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="truncate text-sm font-medium">{notification.title}</p>
-                      {!notification.read && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary-600" />}
+                      <p className={cn("truncate text-sm", notification.read ? "font-medium" : "font-semibold text-foreground")}>
+                        {notification.title}
+                      </p>
+                      {!notification.read && (
+                        <span className="h-2 w-2 shrink-0 rounded-full bg-primary-600 ring-2 ring-primary-100 dark:ring-primary-500/20" />
+                      )}
                     </div>
                     <p className="line-clamp-2 text-xs text-muted-foreground">{notification.description}</p>
                     <p className="mt-1 text-[11px] text-muted-foreground">
-                      {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                      {formatNotificationTime(notification.createdAt)}
                     </p>
                   </div>
                 </Link>
