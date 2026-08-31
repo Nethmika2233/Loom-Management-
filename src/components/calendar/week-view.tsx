@@ -11,8 +11,13 @@ export function WeekView({ week, tasks, onTaskClick }: { week: Date; tasks: Task
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-7">
       {days.map((day) => {
         const dayTasks = tasks.filter((t) => t.dueDate && isSameDay(new Date(t.dueDate), day));
+        const isCurrentDay = isToday(day);
         return (
-          <div key={day.toISOString()} className={cn("rounded-xl border border-border p-3", isToday(day) && "border-primary-400 bg-primary-50/40 dark:bg-primary-500/5")}>
+          <div
+           key={day.toISOString()} 
+           className={cn(
+            "rounded-xl border border-border p-3",
+             isToday(day) && "border-primary-400 bg-primary-50/40 dark:bg-primary-500/5")}>
             <p className="text-xs font-semibold text-muted-foreground">{format(day, "EEE")}</p>
             <p className={cn("text-lg font-bold", isToday(day) && "text-primary-600")}>{format(day, "d")}</p>
             <div className="mt-2 space-y-1.5">
