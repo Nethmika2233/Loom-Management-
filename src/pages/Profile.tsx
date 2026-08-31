@@ -21,23 +21,30 @@ export default function Profile() {
   const [bio, setBio] = useState(user?.bio ?? "");
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [pushNotifs, setPushNotifs] = useState(false);
+  
+  // This state tracks the new password for the strength indicator
+  const [newPassword, setNewPassword] = useState(""); 
 
   if (!user) return null;
 
   const handleSave = () => {
-  if (!name.trim()) {
-    toast.error("Full name is required");
-    return;
-  }
+    if (!name.trim()) {
+      toast.error("Full name is required");
+      return;
+    }
+    if (!title.trim()) {
+      toast.error("Job title is required");
+      return;
+    }
 
-  updateProfile({
-    name: name.trim(),
-    title: title.trim(),
-    bio: bio.trim(),
-  });
+    updateProfile({
+      name: name.trim(),
+      title: title.trim(),
+      bio: bio.trim(),
+    });
 
-  toast.success("Profile updated");
-};
+    toast.success("Profile updated");
+  };
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-4 sm:p-6">
@@ -133,47 +140,67 @@ export default function Profile() {
             <div className="space-y-1.5">
               <Label htmlFor="current-password">Current password</Label>
               <Input
-  id="current-password"
-  type="password"
-  placeholder="••••••••"
-  autoComplete="current-password"
-/>
+                id="current-password"
+                type="password"
+                placeholder="••••••••"
+                autoComplete="current-password"
+              />
             </div>
+            
             <div className="space-y-1.5">
               <Label htmlFor="new-password">New password</Label>
               <Input
-  id="new-password"
-  type="password"
-  placeholder="••••••••"
-  autoComplete="new-password"
-/>
+                id="new-password"
+                type="password"
+                placeholder="••••••••"
+                autoComplete="new-password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+              
+              {/* Password Strength Indicator Bar */}
+              {newPassword.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+                    <div
+                      className={`h-full transition-all duration-300 ${
+                        newPassword.length < 5 ? "w-1/3 bg-red-500" :
+                        newPassword.length < 8 ? "w-2/3 bg-yellow-500" : "w-full bg-green-500"
+                      }`}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {newPassword.length < 5 ? "Weak" : newPassword.length < 8 ? "Fair" : "Strong"}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
           <Button
-  variant="outline"
-  onClick={() => {
-    const currentPassword = (
-      document.getElementById("current-password") as HTMLInputElement
-    )?.value;
-    const newPassword = (
-      document.getElementById("new-password") as HTMLInputElement
-    )?.value;
+            variant="outline"
+            onClick={() => {
+              const currentPassword = (
+                document.getElementById("current-password") as HTMLInputElement
+              )?.value;
+              const newPass = (
+                document.getElementById("new-password") as HTMLInputElement
+              )?.value;
 
-    if (!currentPassword || !newPassword) {
-      toast.error("Please enter both passwords");
-      return;
-    }
+              if (!currentPassword || !newPass) {
+                toast.error("Please enter both passwords");
+                return;
+              }
 
-    if (newPassword.length < 8) {
-      toast.error("New password must be at least 8 characters");
-      return;
-    }
+              if (newPass.length < 8) {
+                toast.error("New password must be at least 8 characters");
+                return;
+              }
 
-    toast.success("Password updated");
-  }}
->
-  Update password
-</Button>
+              toast.success("Password updated");
+            }}
+          >
+            Update password
+          </Button>
         </CardContent>
       </Card>
     </div>
