@@ -1,15 +1,45 @@
 import { formatDistanceToNow } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { mockUsers, mockTasks } from "@/mock";
 import { getInitials } from "@/lib/utils";
-
-const recentItems = mockTasks
-  .flatMap((t) => t.activity.map((a) => ({ ...a, taskTitle: t.title })))
-  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  .slice(0, 6);
+import { useTaskStore } from "@/store/taskStore";
+import { useUserStore } from "@/store/userStore";
+import type { User } from "@/types";
 
 export function RecentActivity() {
+  const tasks = useTaskStore((s) => s.tasks);
+  const currentUser = useUserStore((s) => s.user);
+
+  // Build activity from actual tasks
+  const recentItems = tasks
+    .flatMap((t) =>
+      t.activity.map((a) => ({
+        ...a,
+        taskTitle: t.title,
+      }))
+    )
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 6);
+
+  // Get unique users from tasks
+  const getUserById = (id: string): User | undefined => {
+    if (id === currentUser?.id) return currentUser;
+    return undefined;
+  };
+
+  if (recentItems.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Activity</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">No recent activity yet. Create some tasks to see activity here.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -17,7 +47,7 @@ export function RecentActivity() {
       </CardHeader>
       <CardContent className="space-y-4">
         {recentItems.map((item) => {
-          const actor = mockUsers.find((u) => u.id === item.actorId);
+          const actor = getUserById(item.actorId);
           if (!actor) return null;
           return (
             <div key={item.id} className="flex items-start gap-3">
