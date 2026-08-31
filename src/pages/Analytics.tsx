@@ -50,7 +50,7 @@ const ChartSkeleton = () => (
   <div className="h-[260px] w-full animate-pulse rounded-md bg-slate-200"></div>
 );
 
-// --- NEW EMPTY STAT CARD COMPONENT ---
+// --- EMPTY STAT CARD COMPONENT ---
 const EmptyStatCard = ({ label, icon: Icon }: { label: string; icon: any }) => (
   <div className="rounded-xl border border-slate-200 bg-white/50 p-6 shadow-sm opacity-70">
     <div className="flex flex-row items-center justify-between pb-2">
@@ -63,6 +63,43 @@ const EmptyStatCard = ({ label, icon: Icon }: { label: string; icon: any }) => (
   </div>
 );
 
+// --- NEW: ANIMATED COUNTER HOOK ---
+// This smoothly counts up from 0 to the target number at 60fps
+function useCountUp(end: number, duration: number = 1500) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (end === 0) {
+      setCount(0);
+      return;
+    }
+    
+    let startTime: number | null = null;
+    let animationFrame: number;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = timestamp - startTime;
+      const percentage = Math.min(progress / duration, 1);
+      
+      // Easing function for smooth slowdown at the end
+      const easeOutQuart = 1 - Math.pow(1 - percentage, 4);
+      setCount(Math.floor(end * easeOutQuart));
+
+      if (progress < duration) {
+        animationFrame = requestAnimationFrame(animate);
+      } else {
+        setCount(end);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [end, duration]);
+
+  return count;
+}
+
 export default function Analytics() {
   const tasks = useTaskStore((s) => s.tasks);
   const [timeRange, setTimeRange] = useState("30d");
@@ -70,7 +107,6 @@ export default function Analytics() {
   // --- LOADING STATE ---
   const [isLoading, setIsLoading] = useState(true);
 
-  // Simulate API fetch delay so skeletons are visible on page load
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -78,13 +114,18 @@ export default function Analytics() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Memoized calculations to optimize rendering performance
+  // Memoized calculations
   const { totalTasks, completedTasks, completionRate } = useMemo(() => {
     const total = tasks.length;
     const completed = tasks.filter((t) => t.status === "done").length;
     const rate = total ? Math.round((completed / total) * 100) : 0;
     return { totalTasks: total, completedTasks: completed, completionRate: rate };
   }, [tasks]);
+
+  // --- NEW: APPLY ANIMATED COUNTERS ---
+  const animatedCompletionRate = useCountUp(completionRate);
+  const animatedProductivity = useCountUp(tasks.length ? completionRate : 0);
+  const animatedCompletedTasks = useCountUp(completedTasks);
 
   // Framer Motion variants for a smooth, staggered load effect
   const containerVariants = {
@@ -140,7 +181,7 @@ export default function Analytics() {
         </div>
       </motion.div>
 
-      {/* Top Level Metrics (UPDATED WITH EMPTY STATES) */}
+      {/* Top Level Metrics (UPDATED WITH ANIMATED VALUES) */}
       <motion.div variants={itemVariants} className="grid grid-cols-2 gap-5 lg:grid-cols-4">
         {totalTasks === 0 ? (
           <>
@@ -153,7 +194,7 @@ export default function Analytics() {
           <>
             <StatCard
               label="Completion Rate"
-              value={completionRate}
+              value={animatedCompletionRate}
               suffix="%"
               trend={0}
               icon={CheckCircle2}
@@ -161,7 +202,7 @@ export default function Analytics() {
             />
             <StatCard
               label="Avg. Productivity"
-              value={tasks.length ? completionRate : 0}
+              value={animatedProductivity}
               suffix="%"
               trend={0}
               icon={TrendingUp}
@@ -169,7 +210,7 @@ export default function Analytics() {
             />
             <StatCard
               label="Tasks Closed"
-              value={completedTasks}
+              value={animatedCompletedTasks}
               trend={0}
               icon={Zap}
               accent="bg-[#243b55]/10 text-[#243b55]" 
