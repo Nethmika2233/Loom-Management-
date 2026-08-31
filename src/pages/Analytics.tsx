@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Award, CheckCircle2, TrendingUp, Zap, Download, Calendar, Filter, RefreshCw } from "lucide-react";
+import { Award, CheckCircle2, TrendingUp, Zap, Download, Calendar, Filter, RefreshCw, AlertCircle, Clock, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ProjectProgressChart } from "@/components/charts/project-progress-chart";
@@ -99,18 +99,14 @@ function useCountUp(end: number, duration: number = 1500) {
 export default function Analytics() {
   const tasks = useTaskStore((s) => s.tasks);
   
-  // --- NEW: PERSISTENT STATE USING LOCAL STORAGE ---
   const [timeRange, setTimeRange] = useState(() => {
-    // Check if a saved choice exists in the browser when the page loads
     const savedRange = localStorage.getItem("loom-analytics-time-range");
     return savedRange ? savedRange : "30d";
   });
 
-  // Save the choice to the browser anytime it changes
   useEffect(() => {
     localStorage.setItem("loom-analytics-time-range", timeRange);
   }, [timeRange]);
-  // ------------------------------------------------
 
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -140,11 +136,31 @@ export default function Analytics() {
     }, 1200);
   };
 
-  const { totalTasks, completedTasks, completionRate } = useMemo(() => {
+  // Comprehensive Metrics Calculations
+  const { totalTasks, completedTasks, completionRate, priorityBreakdown, statusBreakdown } = useMemo(() => {
     const total = tasks.length;
     const completed = tasks.filter((t) => t.status === "done").length;
     const rate = total ? Math.round((completed / total) * 100) : 0;
-    return { totalTasks: total, completedTasks: completed, completionRate: rate };
+
+    // Priority metrics
+    const high = tasks.filter((t) => t.priority === "high").length;
+    const medium = tasks.filter((t) => t.priority === "medium").length;
+    const low = tasks.filter((t) => t.priority === "low").length;
+
+    // Status metrics
+    const todo = tasks.filter((t) => t.status === "todo").length;
+    const inProgress = tasks.filter((t) => {
+      const status = String(t.status);
+      return status === "in-progress" || status === "in_progress";
+    }).length;
+
+    return { 
+      totalTasks: total, 
+      completedTasks: completed, 
+      completionRate: rate,
+      priorityBreakdown: { high, medium, low },
+      statusBreakdown: { todo, inProgress, done: completed }
+    };
   }, [tasks]);
 
   const animatedCompletionRate = useCountUp(completionRate);
@@ -261,6 +277,84 @@ export default function Analytics() {
             />
           </>
         )}
+      </motion.div>
+
+      {/* --- SUBSTANTIVE SECTION: TASK HEALTH & WORKLOAD BREAKDOWN --- */}
+      <motion.div variants={itemVariants}>
+        <Card className="border-t-4 border-t-[#4F46E5] shadow-sm bg-white">
+          <CardHeader>
+            <CardTitle className="text-xl font-bold text-[#141e30]">Workload Health & Priority Breakdown</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            {/* Priority Distribution */}
+            <div className="space-y-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <h4 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Tasks by Priority</h4>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                    <span className="flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5 text-red-500"/> High Priority</span>
+                    <span>{priorityBreakdown.high} tasks</span>
+                  </div>
+                  <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-red-500 rounded-full transition-all duration-500" style={{ width: `${totalTasks ? (priorityBreakdown.high / totalTasks) * 100 : 0}%` }}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                    <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 text-amber-500"/> Medium Priority</span>
+                    <span>{priorityBreakdown.medium} tasks</span>
+                  </div>
+                  <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-amber-500 rounded-full transition-all duration-500" style={{ width: `${totalTasks ? (priorityBreakdown.medium / totalTasks) * 100 : 0}%` }}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                    <span className="flex items-center gap-1.5"><CheckCircle className="h-3.5 w-3.5 text-emerald-500"/> Low Priority</span>
+                    <span>{priorityBreakdown.low} tasks</span>
+                  </div>
+                  <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${totalTasks ? (priorityBreakdown.low / totalTasks) * 100 : 0}%` }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Status Distribution */}
+            <div className="space-y-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <h4 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Task Pipeline Status</h4>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                    <span>To Do</span>
+                    <span>{statusBreakdown.todo} tasks</span>
+                  </div>
+                  <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-slate-400 rounded-full transition-all duration-500" style={{ width: `${totalTasks ? (statusBreakdown.todo / totalTasks) * 100 : 0}%` }}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                    <span>In Progress</span>
+                    <span>{statusBreakdown.inProgress} tasks</span>
+                  </div>
+                  <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${totalTasks ? (statusBreakdown.inProgress / totalTasks) * 100 : 0}%` }}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                    <span>Completed</span>
+                    <span>{statusBreakdown.done} tasks</span>
+                  </div>
+                  <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-indigo-600 rounded-full transition-all duration-500" style={{ width: `${totalTasks ? (statusBreakdown.done / totalTasks) * 100 : 0}%` }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
 
       {/* Primary Charts */}
