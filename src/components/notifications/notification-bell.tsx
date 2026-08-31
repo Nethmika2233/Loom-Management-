@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Bell, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck, Inbox } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import {
   DropdownMenu,
@@ -49,10 +49,14 @@ export function NotificationBell() {
 
         <div className="max-h-96 overflow-y-auto">
           {previewNotifications.length === 0 ? (
-            <div className="px-4 py-8 text-center">
-              <Bell className="mx-auto h-8 w-8 text-muted-foreground" />
+            <div className="px-4 py-10 text-center">
+              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-muted">
+                <Inbox className="h-5 w-5 text-muted-foreground" />
+              </div>
               <p className="mt-3 text-sm font-medium">No notifications yet</p>
-              <p className="text-xs text-muted-foreground">New task updates will appear here.</p>
+              <p className="mx-auto mt-1 max-w-52 text-xs text-muted-foreground">
+                Assignment updates, mentions, and reminders will appear here.
+              </p>
             </div>
           ) : (
             previewNotifications.map((notification) => (
