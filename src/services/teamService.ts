@@ -1,9 +1,8 @@
-import { mockUsers } from "@/mock";
 import type { User } from "@/types";
 
 const delay = (ms = 250) => new Promise((res) => setTimeout(res, ms));
 
-let users = [...mockUsers];
+let users: User[] = [];
 
 export const teamService = {
   async getMembers(): Promise<User[]> {
