@@ -8,7 +8,9 @@ export function WeekView({ week, tasks, onTaskClick }: { week: Date; tasks: Task
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-7">
+     <div className="overflow-x-auto pb-2">
+      <div className="grid min-w-[700px] grid-cols-7 gap-3">
+
       {days.map((day) => {
         const dayTasks = tasks.filter((t) => t.dueDate && isSameDay(new Date(t.dueDate), day));
         const isCurrentDay = isToday(day);
@@ -38,6 +40,7 @@ export function WeekView({ week, tasks, onTaskClick }: { week: Date; tasks: Task
           </div>
         );
       })}
+    </div>
     </div>
   );
 }
