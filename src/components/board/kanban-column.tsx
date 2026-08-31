@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { Plus } from "lucide-react";
+import { Inbox, Plus } from "lucide-react";
 import { TaskCard } from "@/components/board/task-card";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
@@ -81,7 +81,8 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
             onClick={() => setAdding(true)}
             className="mt-2 flex min-h-[130px] flex-1 items-center justify-center rounded-xl border border-dashed border-border/80 bg-background/40 px-3 text-center transition-colors hover:border-primary/50 hover:bg-background"
           >
-            <div>
+            <div className="flex flex-col items-center">
+              <Inbox className="mb-2 h-5 w-5 text-muted-foreground/60" />
               <p className="text-sm font-medium text-foreground">No tasks yet</p>
               <p className="mt-1 text-xs text-muted-foreground">Add a task or drop one here</p>
             </div>
