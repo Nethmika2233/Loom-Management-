@@ -7,20 +7,19 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { teamService } from "@/services/teamService";
 
-/**
- * InviteMemberDialog Component
- * Handles the UI and validation for inviting new users to the workspace with specific role assignments.
- */
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export function InviteMemberDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("member");
+  const [emailError, setEmailError] = useState("");
 
-  // Validates input, sends invitation, and resets form state
   const handleInvite = async () => {
-    if (!email.trim() || !email.includes("@")) {
-      toast.error("Enter a valid email address");
+    if (!EMAIL_REGEX.test(email.trim())) {
+      setEmailError("Please enter a valid email address");
       return;
     }
+    setEmailError("");
     if (!role) {
       toast.error("Please select a role");
       return;
@@ -29,7 +28,6 @@ export function InviteMemberDialog({ open, onOpenChange }: { open: boolean; onOp
       await teamService.inviteMember(email);
       toast.success("Invitation sent", { description: `Invited ${email} as ${role}` });
 
-      // Reset form fields
       setEmail("");
       setRole("member");
       onOpenChange(false);
@@ -54,7 +52,12 @@ export function InviteMemberDialog({ open, onOpenChange }: { open: boolean; onOp
               required 
               placeholder="Enter team member email (e.g., name@company.com)" 
               value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (emailError) {
+                  setEmailError("");
+                }
+              }} 
               autoFocus 
             />
           </div>
@@ -80,7 +83,6 @@ export function InviteMemberDialog({ open, onOpenChange }: { open: boolean; onOp
           <Button onClick={handleInvite}>Send invitation</Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog> // TODO: Adding the search filter next
-    
+    </Dialog> 
   );
 }

@@ -48,7 +48,7 @@ export function DueDatePicker({ value, onChange, className }: DueDatePickerProps
             selected={date}
             onSelect={handleDaySelect}
             classNames={{
-              day_selected: "bg-primary-600 text-white rounded-full",
+              selected: "bg-primary-600 text-white rounded-full",
               today: "font-bold underline",
             }}
           />
