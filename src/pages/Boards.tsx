@@ -12,6 +12,7 @@ import type { Board } from "@/types";
 
 export default function Boards() {
   const boards = useBoardStore((s) => s.boards);
+  const isLoading = useBoardStore((s) => (s as unknown as { isLoading?: boolean }).isLoading ?? false);
   const [tab, setTab] = useState<"all" | "favorites" | "archived">("all");
   const [query, setQuery] = useState("");
   const [renameTarget, setRenameTarget] = useState<Board | null>(null);
@@ -51,7 +52,16 @@ export default function Boards() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="h-32 rounded-lg border bg-muted/40 animate-pulse p-4 space-y-3">
+              <div className="h-5 w-3/4 rounded bg-muted" />
+              <div className="h-4 w-1/2 rounded bg-muted" />
+            </div>
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
         <EmptyState
           icon={Trello}
           title="No boards found"
