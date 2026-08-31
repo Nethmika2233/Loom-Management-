@@ -7,6 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { teamService } from "@/services/teamService";
 
+/**
+ * InviteMemberDialog Component
+ * Handles the UI and validation for inviting new users to the workspace with specific role assignments.
+ */
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function InviteMemberDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
@@ -14,6 +18,7 @@ export function InviteMemberDialog({ open, onOpenChange }: { open: boolean; onOp
   const [role, setRole] = useState("member");
   const [emailError, setEmailError] = useState("");
 
+  // Validates input, sends invitation, and resets form state
   const handleInvite = async () => {
     if (!EMAIL_REGEX.test(email.trim())) {
       setEmailError("Please enter a valid email address");
@@ -28,6 +33,7 @@ export function InviteMemberDialog({ open, onOpenChange }: { open: boolean; onOp
       await teamService.inviteMember(email);
       toast.success("Invitation sent", { description: `Invited ${email} as ${role}` });
 
+      // Reset form fields
       setEmail("");
       setRole("member");
       onOpenChange(false);
@@ -60,6 +66,7 @@ export function InviteMemberDialog({ open, onOpenChange }: { open: boolean; onOp
               }} 
               autoFocus 
             />
+            {emailError && <p className="text-xs text-red-500">{emailError}</p>}
           </div>
           <div className="space-y-1.5">
             <Label>Role</Label>
