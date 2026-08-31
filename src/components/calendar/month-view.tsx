@@ -13,7 +13,7 @@ import { PriorityBadge } from "@/components/common/priority-badge";
 import type { Task } from "@/types";
 import { cn } from "@/lib/utils";
 
-export function MonthView({ month, tasks, onTaskClick }: { month: Date; tasks: Task[]; onTaskClick: (task: Task) => void }) {
+export function MonthView({ month, tasks, onTaskClick, onDayClick, selectedDay }: { month: Date; tasks: Task[]; onTaskClick: (task: Task) => void; onDayClick?: (day: Date) => void; selectedDay?: Date | null }) {
   const start = startOfWeek(startOfMonth(month));
   const end = endOfWeek(endOfMonth(month));
 
@@ -41,9 +41,11 @@ export function MonthView({ month, tasks, onTaskClick }: { month: Date; tasks: T
           return (
             <div
               key={day.toISOString()}
+              onClick={() => onDayClick?.(day)}
               className={cn(
-                "min-h-[110px] border-b border-r border-border p-1.5 last:border-r-0",
-                !isSameMonth(day, month) && "bg-muted/30 text-muted-foreground/50"
+                "min-h-[110px] cursor-pointer border-b border-r border-border p-1.5 transition-colors last:border-r-0 hover:bg-muted/50",
+                !isSameMonth(day, month) && "bg-muted/30 text-muted-foreground/50",
+                selectedDay && isSameDay(day, selectedDay) && "bg-primary-50 ring-1 ring-inset ring-primary-300 dark:bg-primary-500/10"
               )}
             >
               <span
