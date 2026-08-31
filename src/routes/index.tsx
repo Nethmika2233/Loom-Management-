@@ -1,8 +1,51 @@
 import { lazy, Suspense } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, useRouteError } from "react-router-dom";
 import { ProtectedRoute } from "@/components/common/protected-route";
 import { AdminRoute } from "@/components/common/admin-route";
 import { PageLoader } from "@/components/common/page-loader";
+
+function ErrorScreen({ message }: { message?: string }) {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
+      <h1 className="text-xl font-bold">Something went wrong</h1>
+      <pre className="max-w-lg overflow-auto rounded-lg bg-muted p-4 text-xs text-muted-foreground">
+        {message || "Unknown error"}
+      </pre>
+      <button
+        onClick={() => window.location.reload()}
+        className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white"
+      >
+        Reload page
+      </button>
+    </div>
+  );
+}
+
+function withSuspense(node: React.ReactNode) {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <ErrorBoundaryWrap>{node}</ErrorBoundaryWrap>
+    </Suspense>
+  );
+}
+
+import { Component, ReactNode } from "react";
+
+class ErrorBoundaryWrap extends Component<{ children: ReactNode }, { hasError: boolean; message: string }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false, message: "" };
+  }
+  static getDerivedStateFromError(err: Error) {
+    return { hasError: true, message: err?.message || String(err) };
+  }
+  render() {
+    if (this.state.hasError) {
+      return <ErrorScreen message={this.state.message} />;
+    }
+    return this.props.children;
+  }
+}
 
 const AuthLayout = lazy(() => import("@/layouts/AuthLayout"));
 const AppLayout = lazy(() => import("@/layouts/AppLayout"));
@@ -11,7 +54,6 @@ const AdminLayout = lazy(() => import("@/layouts/AdminLayout"));
 const Login = lazy(() => import("@/pages/auth/Login"));
 const Register = lazy(() => import("@/pages/auth/Register"));
 const ForgotPassword = lazy(() => import("@/pages/auth/ForgotPassword"));
-const OtpVerification = lazy(() => import("@/pages/auth/OtpVerification"));
 
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
@@ -26,10 +68,6 @@ const Settings = lazy(() => import("@/pages/Settings"));
 const HelpCenter = lazy(() => import("@/pages/HelpCenter"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
-function withSuspense(node: React.ReactNode) {
-  return <Suspense fallback={<PageLoader />}>{node}</Suspense>;
-}
-
 const router = createBrowserRouter([
   {
     path: "/auth",
@@ -38,7 +76,6 @@ const router = createBrowserRouter([
       { path: "login", element: withSuspense(<Login />) },
       { path: "register", element: withSuspense(<Register />) },
       { path: "forgot-password", element: withSuspense(<ForgotPassword />) },
-      { path: "otp", element: withSuspense(<OtpVerification />) },
     ],
   },
   {
