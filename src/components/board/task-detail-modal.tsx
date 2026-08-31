@@ -24,12 +24,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PriorityBadge } from "@/components/common/priority-badge";
-import { mockLabels, mockUsers } from "@/mock";
+import { DueDatePicker } from "@/components/common/due-date-picker";
+import { mockLabels } from "@/mock";
 import { useTaskStore } from "@/store/taskStore";
 import { useUserStore } from "@/store/userStore";
+import { teamService } from "@/services/teamService";
 import { STATUS_CONFIG } from "@/constants";
 import { getInitials, cn } from "@/lib/utils";
-import type { Task, TaskStatus, Priority } from "@/types";
+import type { Task, TaskStatus, Priority, User } from "@/types";
 
 export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onOpenChange: (open: boolean) => void }) {
   const updateTask = useTaskStore((s) => s.updateTask);
@@ -37,6 +39,7 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
   const toggleChecklistItem = useTaskStore((s) => s.toggleChecklistItem);
   const addComment = useTaskStore((s) => s.addComment);
   const currentUser = useUserStore((s) => s.user);
+  const [members, setMembers] = useState<User[]>([]);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -53,6 +56,10 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
       setConfirmingDelete(false);
     }
   }, [task]);
+
+  useEffect(() => {
+    teamService.getMembers().then(setMembers);
+  }, []);
 
   if (!task) return null;
 
@@ -105,7 +112,7 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
     onOpenChange(false);
   };
 
-  const assignees = task.assigneeIds.map((id) => mockUsers.find((u) => u.id === id)).filter(Boolean) as typeof mockUsers;
+  const assignees = task.assigneeIds.map((id) => members.find((u) => u.id === id)).filter(Boolean) as User[];
   const labels = task.labelIds.map((id) => mockLabels.find((l) => l.id === id)).filter(Boolean) as typeof mockLabels;
 
   return (
@@ -197,7 +204,7 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
 
               <TabsContent value="comments" className="space-y-3">
                 {task.comments.map((comment) => {
-                  const author = mockUsers.find((u) => u.id === comment.authorId);
+                  const author = members.find((u) => u.id === comment.authorId);
                   return (
                     <div key={comment.id} className="flex items-start gap-2.5">
                       <Avatar className="h-7 w-7">
@@ -250,7 +257,7 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
                   .slice()
                   .reverse()
                   .map((entry) => {
-                    const actor = mockUsers.find((u) => u.id === entry.actorId);
+                    const actor = members.find((u) => u.id === entry.actorId);
                     return (
                       <div key={entry.id} className="flex items-start gap-2.5">
                         <Avatar className="h-6 w-6">
@@ -304,11 +311,9 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
 
             <div className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground">Due date</p>
-              <Input
-                type="date"
-                className="h-8 text-sm"
-                value={task.dueDate ? task.dueDate.slice(0, 10) : ""}
-                onChange={(e) => updateTask(task.id, { dueDate: e.target.value ? new Date(e.target.value).toISOString() : undefined })}
+              <DueDatePicker
+                value={task.dueDate}
+                onChange={(iso) => updateTask(task.id, { dueDate: iso })}
               />
             </div>
 
@@ -332,20 +337,24 @@ export function TaskDetailModal({ task, onOpenChange }: { task: Task | null; onO
                 </PopoverTrigger>
                 <PopoverContent className="w-56 p-2">
                   <div className="space-y-1">
-                    {mockUsers.map((u) => (
-                      <button
-                        key={u.id}
-                        onClick={() => toggleAssignee(u.id)}
-                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-muted"
-                      >
-                        <Checkbox checked={task.assigneeIds.includes(u.id)} />
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage src={u.avatarUrl} />
-                          <AvatarFallback className="text-[9px]">{getInitials(u.name)}</AvatarFallback>
-                        </Avatar>
-                        <span className="truncate text-sm">{u.name}</span>
-                      </button>
-                    ))}
+                    {members.length === 0 ? (
+                      <p className="px-2 py-1.5 text-xs text-muted-foreground">No members yet</p>
+                    ) : (
+                      members.map((u) => (
+                        <button
+                          key={u.id}
+                          onClick={() => toggleAssignee(u.id)}
+                          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-muted"
+                        >
+                          <Checkbox checked={task.assigneeIds.includes(u.id)} />
+                          <Avatar className="h-6 w-6">
+                            <AvatarImage src={u.avatarUrl} />
+                            <AvatarFallback className="text-[9px]">{getInitials(u.name)}</AvatarFallback>
+                          </Avatar>
+                          <span className="truncate text-sm">{u.name}</span>
+                        </button>
+                      ))
+                    )}
                   </div>
                 </PopoverContent>
               </Popover>

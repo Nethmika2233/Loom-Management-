@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { mockNotifications } from "@/mock";
 import { notificationService } from "@/services/notificationService";
 import type { AppNotification } from "@/types";
 
@@ -12,8 +11,7 @@ interface NotificationState {
 }
 
 export const useNotificationStore = create<NotificationState>()((set, get) => ({
-  // seed with mock data for immediate UI responsiveness
-  notifications: mockNotifications,
+  notifications: [],
   unreadCount: () => get().notifications.filter((n) => !n.read).length,
   markAsRead: async (id: string) => {
     try {

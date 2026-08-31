@@ -1,7 +1,35 @@
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { completionRateTrend } from "@/mock/analytics";
+import { useTaskStore } from "@/store/taskStore";
 
 export function CompletionRateChart() {
+  const tasks = useTaskStore((s) => s.tasks);
+
+  // Build completion rate trend from actual tasks
+  // Group tasks by month and calculate completion rate
+  const monthlyData: Record<string, { total: number; completed: number }> = {};
+  tasks.forEach((task) => {
+    const month = task.createdAt?.slice(0, 7) || "Unknown";
+    if (!monthlyData[month]) monthlyData[month] = { total: 0, completed: 0 };
+    monthlyData[month].total++;
+    if (task.status === "done") monthlyData[month].completed++;
+  });
+
+  const completionRateTrend = Object.entries(monthlyData)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(-6)
+    .map(([month, data]) => ({
+      month,
+      rate: data.total ? Math.round((data.completed / data.total) * 100) : 0,
+    }));
+
+  if (completionRateTrend.length === 0) {
+    return (
+      <div className="flex h-[260px] items-center justify-center text-sm text-muted-foreground">
+        No data yet. Complete tasks to see trends.
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height={260}>
       <AreaChart data={completionRateTrend} margin={{ top: 8, right: 12, left: -20, bottom: 0 }}>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { teamService } from "@/services/teamService";
 
 /**
  * InviteMemberDialog Component
@@ -15,7 +16,7 @@ export function InviteMemberDialog({ open, onOpenChange }: { open: boolean; onOp
   const [role, setRole] = useState("member");
 
   // Validates input, sends invitation, and resets form state
-  const handleInvite = () => {
+  const handleInvite = async () => {
     if (!email.trim() || !email.includes("@")) {
       toast.error("Enter a valid email address");
       return;
@@ -24,12 +25,17 @@ export function InviteMemberDialog({ open, onOpenChange }: { open: boolean; onOp
       toast.error("Please select a role");
       return;
     }
-    toast.success("Invitation sent", { description: `Invited ${email} as ${role}` });
-    
-    // Reset form fields
-    setEmail("");
-    setRole("member");
-    onOpenChange(false);
+    try {
+      await teamService.inviteMember(email);
+      toast.success("Invitation sent", { description: `Invited ${email} as ${role}` });
+
+      // Reset form fields
+      setEmail("");
+      setRole("member");
+      onOpenChange(false);
+    } catch (error) {
+      toast.error("Failed to invite member");
+    }
   };
 
   return (

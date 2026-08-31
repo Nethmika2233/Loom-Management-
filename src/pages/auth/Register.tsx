@@ -31,8 +31,8 @@ export default function Register() {
   const onSubmit = async (values: RegisterFormValues) => {
     const user = await authService.register(values);
     login(user);
-    toast.success("Account created", { description: "Let's verify your email to get started." });
-    navigate("/auth/otp");
+    toast.success("Account created", { description: "Welcome! Your workspace is ready." });
+    navigate("/");
   };
 
   return (

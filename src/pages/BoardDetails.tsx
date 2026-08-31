@@ -28,6 +28,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { useBoardStore } from "@/store/boardStore";
 import { useTaskStore } from "@/store/taskStore";
 import { useFilterStore } from "@/store/filterStore";
+import { useUserStore } from "@/store/userStore";
 import { mockLabels } from "@/mock";
 import type { Task, TaskStatus } from "@/types";
 import { cn } from "@/lib/utils";
@@ -41,6 +42,7 @@ export default function BoardDetails() {
   const tasks = useTaskStore((s) => s.tasks);
   const moveTask = useTaskStore((s) => s.moveTask);
   const addTask = useTaskStore((s) => s.addTask);
+  const currentUser = useUserStore((s) => s.user);
 
   const { priority, labelId, assigneeId, setPriority, setLabel, setAssignee, reset } = useFilterStore();
 
@@ -95,29 +97,38 @@ export default function BoardDetails() {
   };
 
   const handleAddTask = (columnId: string, title: string) => {
-    const column = board.columns.find((c) => c.id === columnId)!;
-    const statusIdx = board.columns.findIndex((c) => c.id === columnId);
-    const status = (["todo", "doing", "review", "done"] as TaskStatus[])[statusIdx] ?? "todo";
+    try {
+      const column = board.columns.find((c) => c.id === columnId);
+      if (!column) {
+        toast.error("Column not found");
+        return;
+      }
+      const statusIdx = board.columns.findIndex((c) => c.id === columnId);
+      const status = (["todo", "doing", "review", "done"] as TaskStatus[])[statusIdx] ?? "todo";
 
-    addTask({
-      id: `t${Date.now()}`,
-      boardId: board.id,
-      columnId,
-      title,
-      description: "",
-      status,
-      priority: "medium",
-      assigneeIds: [],
-      labelIds: [],
-      checklist: [],
-      comments: [],
-      attachments: [],
-      activity: [{ id: `act${Date.now()}`, actorId: "u1", action: "created this task", createdAt: new Date().toISOString() }],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      order: 0,
-    });
-    toast.success(`Task added to ${column.title}`);
+      addTask({
+        id: `t${Date.now()}`,
+        boardId: board.id,
+        columnId,
+        title,
+        description: "",
+        status,
+        priority: "medium",
+        assigneeIds: [],
+        labelIds: [],
+        checklist: [],
+        comments: [],
+        attachments: [],
+        activity: [{ id: `act${Date.now()}`, actorId: currentUser?.id || "unknown", action: "created this task", createdAt: new Date().toISOString() }],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        order: 0,
+      });
+      toast.success(`Task added to ${column.title}`);
+    } catch (error) {
+      console.error("Failed to add task:", error);
+      toast.error("Failed to add task", { description: error instanceof Error ? error.message : "Unknown error" });
+    }
   };
 
   return (
@@ -134,8 +145,8 @@ export default function BoardDetails() {
           <button onClick={() => toggleFavorite(board.id)} aria-label="Toggle favorite">
             <Star className={cn("h-5 w-5 text-muted-foreground", board.favorite && "fill-warning-500 text-warning-500")} />
           </button>
-          <AvatarStack userIds={board.memberIds} max={5} />
-          <Button variant="outline" size="sm">
+          <AvatarStack userIds={board.memberIds} users={[]} max={5} />
+          <Button variant="outline" size="sm" onClick={() => toast.info("Invite feature coming soon!")}>
             <Users className="h-3.5 w-3.5" /> Invite
           </Button>
           <DropdownMenu>
@@ -145,8 +156,8 @@ export default function BoardDetails() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Board settings</DropdownMenuItem>
-              <DropdownMenuItem>Change background</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast.info("Board settings coming soon!")}>Board settings</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast.info("Change background coming soon!")}>Change background</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

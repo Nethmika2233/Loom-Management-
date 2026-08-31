@@ -55,8 +55,9 @@ export default function Login() {
         <p className="text-sm text-muted-foreground">Sign in to your workspace to continue</p>
       </div>
 
-      <div className="rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-xs text-primary-700 dark:border-primary-500/20 dark:bg-primary-500/10 dark:text-primary-400">
-        Demo mode — enter any username &amp; password to sign in.
+      <div className="rounded-lg border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
+        Administrator access — username: <span className="font-medium text-foreground">admin</span>,
+        password: <span className="font-medium text-foreground">admin123</span>.
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -96,7 +97,7 @@ export default function Login() {
 
         <div className="space-y-1.5">
           <Label htmlFor="username">Username</Label>
-          <Input id="username" type="text" placeholder="Enter any username" {...register("username")} />
+          <Input id="username" type="text" placeholder="Username or email" {...register("username")} />
           {errors.username && <p className="text-xs text-danger-600">{errors.username.message}</p>}
         </div>
 

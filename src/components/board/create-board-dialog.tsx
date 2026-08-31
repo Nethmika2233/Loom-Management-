@@ -33,56 +33,48 @@ export function CreateBoardDialog({ open, onOpenChange }: { open: boolean; onOpe
       toast.error("Board name is required");
       return;
     }
-    if (trimmedName.length < 3) {
-      toast.error("Board name is too short", {
-        description: "Board name must be at least 3 characters long."
-      });
-      return;
-    }
-    if (trimmedName.length > 50) {
-      toast.error("Board name letter count exceeded", {
-        description: "Board name cannot exceed 50 characters. Please shorten it."
-      });
-      return;
-    }
+    try {
+      // Check for duplicate board name (case-insensitive)
+      const isDuplicate = boards.some(
+        (b) => b.name.trim().toLowerCase() === trimmedName.toLowerCase()
+      );
 
-    // Check for duplicate board name (case-insensitive)
-    const isDuplicate = boards.some(
-      (b) => b.name.trim().toLowerCase() === trimmedName.toLowerCase()
-    );
+      if (isDuplicate) {
+        toast.error("Board name already exists", {
+          description: "A board with this name already exists. Please choose a different name."
+        });
+        return;
+      }
 
-    if (isDuplicate) {
-      toast.error("Board name already exists", {
-        description: "A board with this name already exists. Please choose a different name."
-      });
-      return;
+      const id = `b${Date.now()}`;
+      const board: Board = {
+        id,
+        name: trimmedName,
+        description,
+        workspaceId: "w1",
+        columns: [
+          { id: `${id}-c1`, boardId: id, title: "To Do", order: 0, color: "#94A3B8" },
+          { id: `${id}-c2`, boardId: id, title: "Doing", order: 1, color: "#4F46E5" },
+          { id: `${id}-c3`, boardId: id, title: "Review", order: 2, color: "#F97316" },
+          { id: `${id}-c4`, boardId: id, title: "Done", order: 3, color: "#16A34A" },
+        ],
+        memberIds: [],
+        favorite: false,
+        archived: false,
+        color,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      createBoard(board);
+      toast.success("Board created", { description: trimmedName });
+      onOpenChange(false);
+      setName("");
+      setDescription("");
+      navigate(`/boards/${id}`);
+    } catch (error) {
+      console.error("Failed to create board:", error);
+      toast.error("Failed to create board", { description: error instanceof Error ? error.message : "Unknown error" });
     }
-
-    const id = `b${Date.now()}`;
-    const board: Board = {
-      id,
-      name: trimmedName,
-      description,
-      workspaceId: "w1",
-      columns: [
-        { id: `${id}-c1`, boardId: id, title: "To Do", order: 0, color: "#94A3B8" },
-        { id: `${id}-c2`, boardId: id, title: "Doing", order: 1, color: "#4F46E5" },
-        { id: `${id}-c3`, boardId: id, title: "Review", order: 2, color: "#F97316" },
-        { id: `${id}-c4`, boardId: id, title: "Done", order: 3, color: "#16A34A" },
-      ],
-      memberIds: ["u1"],
-      favorite: false,
-      archived: false,
-      color,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    createBoard(board);
-    toast.success("Board created", { description: trimmedName });
-    onOpenChange(false);
-    setName("");
-    setDescription("");
-    navigate(`/boards/${id}`);
   };
 
   return (

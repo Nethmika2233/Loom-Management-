@@ -1,12 +1,12 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { mockUsers } from "@/mock";
 import { getInitials } from "@/lib/utils";
+import type { User } from "@/types";
 
-export function AvatarStack({ userIds, max = 3, size = "h-6 w-6" }: { userIds: string[]; max?: number; size?: string }) {
-  const users = userIds.map((id) => mockUsers.find((u) => u.id === id)).filter(Boolean) as (typeof mockUsers)[number][];
-  const visible = users.slice(0, max);
-  const overflow = users.length - visible.length;
+export function AvatarStack({ userIds, users = [], max = 3, size = "h-6 w-6" }: { userIds: string[]; users?: User[]; max?: number; size?: string }) {
+  const resolvedUsers = (users ?? []).filter(Boolean).filter((u) => userIds.includes(u.id));
+  const visible = resolvedUsers.slice(0, max);
+  const overflow = resolvedUsers.length - visible.length;
 
   return (
     <div className="flex -space-x-2">

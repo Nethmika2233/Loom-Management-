@@ -9,6 +9,41 @@ import { MemberActivityChart } from "@/components/charts/member-activity-chart";
 import { WeeklyProductivityChart } from "@/components/charts/weekly-productivity-chart";
 import { useTaskStore } from "@/store/taskStore";
 import { motion } from "framer-motion";
+import { Component, ReactNode } from "react";
+
+// Proper React Error Boundary
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback: ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+class ChartErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
+const chartFallback = (
+  <div className="flex h-[260px] items-center justify-center text-sm text-slate-400">
+    Unable to load chart. Please try refreshing.
+  </div>
+);
 
 export default function Analytics() {
   const tasks = useTaskStore((s) => s.tasks);
@@ -69,6 +104,7 @@ export default function Analytics() {
             </select>
           </div>
 
+
           <button className="flex items-center gap-2 rounded-md bg-[#141e30] px-5 py-2 text-sm font-semibold text-[#D4AF37] hover:bg-[#243b55] hover:text-white transition-all shadow-md focus:ring-2 focus:ring-[#D4AF37] focus:outline-none">
             <Download className="h-4 w-4" />
             Download Data
@@ -82,28 +118,28 @@ export default function Analytics() {
           label="Completion Rate"
           value={completionRate}
           suffix="%"
-          trend={6}
+          trend={0}
           icon={CheckCircle2}
           accent="bg-[#141e30]/10 text-[#141e30]" 
         />
         <StatCard
           label="Avg. Productivity"
-          value={78}
+          value={tasks.length ? completionRate : 0}
           suffix="%"
-          trend={4}
+          trend={0}
           icon={TrendingUp}
           accent="bg-slate-200 text-slate-700" 
         />
         <StatCard
           label="Tasks Closed"
           value={completedTasks}
-          trend={11}
+          trend={0}
           icon={Zap}
           accent="bg-[#243b55]/10 text-[#243b55]" 
         />
         <StatCard
           label="Top Performer"
-          value={31}
+          value={0}
           suffix=" tasks"
           icon={Award}
           accent="bg-[#D4AF37]/15 text-[#b5952f]" 
@@ -117,7 +153,9 @@ export default function Analytics() {
             <CardTitle className="text-lg font-bold text-[#141e30]">Project Progress</CardTitle>
           </CardHeader>
           <CardContent className="pt-4">
-            <ProjectProgressChart />
+            <ChartErrorBoundary fallback={chartFallback}>
+              <ProjectProgressChart />
+            </ChartErrorBoundary>
           </CardContent>
         </Card>
 
@@ -127,7 +165,9 @@ export default function Analytics() {
             <Filter className="h-4 w-4 text-slate-400 cursor-pointer hover:text-[#141e30] transition-colors" />
           </CardHeader>
           <CardContent className="pt-4">
-            <TaskStatusPieChart />
+            <ChartErrorBoundary fallback={chartFallback}>
+              <TaskStatusPieChart />
+            </ChartErrorBoundary>
           </CardContent>
         </Card>
       </motion.div>
@@ -139,7 +179,9 @@ export default function Analytics() {
             <CardTitle className="text-lg font-bold text-slate-700">Completion Rate Trend</CardTitle>
           </CardHeader>
           <CardContent>
-            <CompletionRateChart />
+            <ChartErrorBoundary fallback={chartFallback}>
+              <CompletionRateChart />
+            </ChartErrorBoundary>
           </CardContent>
         </Card>
 
@@ -148,7 +190,9 @@ export default function Analytics() {
             <CardTitle className="text-lg font-bold text-slate-700">Weekly Performance</CardTitle>
           </CardHeader>
           <CardContent>
-            <WeeklyProductivityChart />
+            <ChartErrorBoundary fallback={chartFallback}>
+              <WeeklyProductivityChart />
+            </ChartErrorBoundary>
           </CardContent>
         </Card>
       </motion.div>
@@ -165,7 +209,9 @@ export default function Analytics() {
             </div>
           </CardHeader>
           <CardContent className="pt-6">
-            <MemberActivityChart />
+            <ChartErrorBoundary fallback={chartFallback}>
+              <MemberActivityChart />
+            </ChartErrorBoundary>
           </CardContent>
         </Card>
       </motion.div>

@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle2, LayoutGrid, Sparkles, Users } from "lucide-react";
+import { LayoutGrid, Sparkles, Users } from "lucide-react";
 import { LoomIcon } from "@/components/common/logo";
 
 const highlights = [
@@ -54,16 +54,6 @@ export default function AuthLayout() {
               </motion.div>
             ))}
           </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="relative z-10 flex items-center gap-2 text-sm text-white/70"
-        >
-          <CheckCircle2 className="h-4 w-4" />
-          Trusted by 4,000+ product teams worldwide
         </motion.div>
       </div>
 
