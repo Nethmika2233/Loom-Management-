@@ -48,7 +48,7 @@ export function TaskCard({ task, onClick }: { task: Task; onClick: () => void })
               {...attributes}
               {...listeners}
               onClick={(e) => e.stopPropagation()}
-              className="ml-auto shrink-0 cursor-grab touch-none rounded p-0.5 text-muted-foreground opacity-0 group-hover:opacity-100 active:cursor-grabbing"
+              className="ml-auto shrink-0 cursor-grab touch-none rounded p-0.5 text-muted-foreground opacity-60 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 active:cursor-grabbing"
               aria-label="Drag task"
             >
               <GripVertical className="h-4 w-4" />
