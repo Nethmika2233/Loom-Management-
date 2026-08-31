@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { ListTodo, ShieldCheck, Trello, UserCheck, Users, Search, UserX } from "lucide-react";
+import { ListTodo, ShieldCheck, Trello, UserCheck, Users, Search, UserX, Trash2, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -40,6 +40,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("all");
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -73,6 +74,13 @@ export default function AdminDashboard() {
       return matchesSearch && matchesRole;
     });
   }, [members, searchQuery, selectedRole]);
+
+  const handleConfirmDelete = () => {
+    if (userToDelete) {
+      setMembers((prev) => prev.filter((u) => u.id !== userToDelete.id));
+      setUserToDelete(null);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
@@ -171,12 +179,13 @@ export default function AdminDashboard() {
                   <th className="px-4 py-2.5 font-medium">Department</th>
                   <th className="px-4 py-2.5 font-medium">Status</th>
                   <th className="px-4 py-2.5 font-medium">Joined</th>
+                  <th className="px-4 py-2.5 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredMembers.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                    <td colSpan={6} className="px-4 py-12 text-center text-sm text-muted-foreground">
                       <div className="flex flex-col items-center justify-center gap-2">
                         <UserX className="h-8 w-8 text-muted-foreground/60" />
                         <p className="font-medium text-foreground">
@@ -216,6 +225,15 @@ export default function AdminDashboard() {
                       <td className="px-4 py-2.5 text-muted-foreground">{u.department}</td>
                       <td className="px-4 py-2.5 capitalize text-muted-foreground">{u.status}</td>
                       <td className="px-4 py-2.5 text-muted-foreground">{u.joinedAt}</td>
+                      <td className="px-4 py-2.5 text-right">
+                        <button
+                          onClick={() => setUserToDelete(u)}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                          title="Remove user"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -224,6 +242,40 @@ export default function AdminDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      {userToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Confirm User Removal</h3>
+                <p className="text-xs text-muted-foreground">This action cannot be undone.</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to remove <span className="font-semibold text-foreground">{userToDelete.name}</span> from the workspace?
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={() => setUserToDelete(null)}
+                className="h-9 px-4 rounded-md border border-input bg-transparent text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="h-9 px-4 rounded-md bg-destructive text-destructive-foreground text-sm font-medium hover:bg-destructive/90"
+              >
+                Delete User
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
