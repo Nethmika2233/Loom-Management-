@@ -80,6 +80,7 @@ export function InviteMemberDialog({ open, onOpenChange }: { open: boolean; onOp
           <Button onClick={handleInvite}>Send invitation</Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
+    </Dialog> // TODO: Adding the search filter next
+    
   );
 }
