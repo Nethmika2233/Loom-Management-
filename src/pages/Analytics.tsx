@@ -98,12 +98,22 @@ function useCountUp(end: number, duration: number = 1500) {
 
 export default function Analytics() {
   const tasks = useTaskStore((s) => s.tasks);
-  const [timeRange, setTimeRange] = useState("30d");
   
+  // --- NEW: PERSISTENT STATE USING LOCAL STORAGE ---
+  const [timeRange, setTimeRange] = useState(() => {
+    // Check if a saved choice exists in the browser when the page loads
+    const savedRange = localStorage.getItem("loom-analytics-time-range");
+    return savedRange ? savedRange : "30d";
+  });
+
+  // Save the choice to the browser anytime it changes
+  useEffect(() => {
+    localStorage.setItem("loom-analytics-time-range", timeRange);
+  }, [timeRange]);
+  // ------------------------------------------------
+
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
-  
-  // --- NEW: REFRESH STATE ---
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
@@ -120,10 +130,9 @@ export default function Analytics() {
     }, 2000);
   };
 
-  // --- NEW: REFRESH HANDLER ---
   const handleRefresh = () => {
     setIsRefreshing(true);
-    setIsLoading(true); // Trigger the skeletons again!
+    setIsLoading(true); 
     
     setTimeout(() => {
       setIsRefreshing(false);
@@ -172,7 +181,6 @@ export default function Analytics() {
 
         <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-0">
           
-          {/* NEW REFRESH BUTTON */}
           <button 
             onClick={handleRefresh}
             disabled={isRefreshing}
