@@ -45,12 +45,10 @@ const chartFallback = (
   </div>
 );
 
-// --- SKELETON COMPONENT ---
 const ChartSkeleton = () => (
   <div className="h-[260px] w-full animate-pulse rounded-md bg-slate-200"></div>
 );
 
-// --- EMPTY STAT CARD COMPONENT ---
 const EmptyStatCard = ({ label, icon: Icon }: { label: string; icon: any }) => (
   <div className="rounded-xl border border-slate-200 bg-white/50 p-6 shadow-sm opacity-70">
     <div className="flex flex-row items-center justify-between pb-2">
@@ -63,8 +61,7 @@ const EmptyStatCard = ({ label, icon: Icon }: { label: string; icon: any }) => (
   </div>
 );
 
-// --- NEW: ANIMATED COUNTER HOOK ---
-// This smoothly counts up from 0 to the target number at 60fps
+// Animated counter hook
 function useCountUp(end: number, duration: number = 1500) {
   const [count, setCount] = useState(0);
 
@@ -82,7 +79,6 @@ function useCountUp(end: number, duration: number = 1500) {
       const progress = timestamp - startTime;
       const percentage = Math.min(progress / duration, 1);
       
-      // Easing function for smooth slowdown at the end
       const easeOutQuart = 1 - Math.pow(1 - percentage, 4);
       setCount(Math.floor(end * easeOutQuart));
 
@@ -104,8 +100,10 @@ export default function Analytics() {
   const tasks = useTaskStore((s) => s.tasks);
   const [timeRange, setTimeRange] = useState("30d");
   
-  // --- LOADING STATE ---
   const [isLoading, setIsLoading] = useState(true);
+  
+  // --- NEW: DOWNLOAD BUTTON STATE ---
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -114,7 +112,15 @@ export default function Analytics() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Memoized calculations
+  // --- NEW: DOWNLOAD HANDLER ---
+  const handleDownload = () => {
+    setIsDownloading(true);
+    // Simulate a network request, then reset button after 2 seconds
+    setTimeout(() => {
+      setIsDownloading(false);
+    }, 2000);
+  };
+
   const { totalTasks, completedTasks, completionRate } = useMemo(() => {
     const total = tasks.length;
     const completed = tasks.filter((t) => t.status === "done").length;
@@ -122,18 +128,13 @@ export default function Analytics() {
     return { totalTasks: total, completedTasks: completed, completionRate: rate };
   }, [tasks]);
 
-  // --- NEW: APPLY ANIMATED COUNTERS ---
   const animatedCompletionRate = useCountUp(completionRate);
   const animatedProductivity = useCountUp(tasks.length ? completionRate : 0);
   const animatedCompletedTasks = useCountUp(completedTasks);
 
-  // Framer Motion variants for a smooth, staggered load effect
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
   };
 
   const itemVariants = {
@@ -160,7 +161,6 @@ export default function Analytics() {
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-0">
-          {/* Time Range Context Selector */}
           <div className="flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm hover:bg-slate-100 transition-colors cursor-pointer">
             <Calendar className="h-4 w-4 text-[#243b55]" />
             <select
@@ -174,14 +174,23 @@ export default function Analytics() {
             </select>
           </div>
 
-          <button className="flex items-center gap-2 rounded-md bg-[#141e30] px-5 py-2 text-sm font-semibold text-[#D4AF37] hover:bg-[#243b55] hover:text-white transition-all shadow-md focus:ring-2 focus:ring-[#D4AF37] focus:outline-none">
-            <Download className="h-4 w-4" />
-            Download Data
+          {/* UPDATED DOWNLOAD BUTTON */}
+          <button 
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className={`flex items-center gap-2 rounded-md px-5 py-2 text-sm font-semibold transition-all shadow-md focus:ring-2 focus:ring-[#D4AF37] focus:outline-none ${
+              isDownloading 
+                ? "bg-green-600 text-white cursor-default" 
+                : "bg-[#141e30] text-[#D4AF37] hover:bg-[#243b55] hover:text-white"
+            }`}
+          >
+            {isDownloading ? <CheckCircle2 className="h-4 w-4" /> : <Download className="h-4 w-4" />}
+            {isDownloading ? "Exported!" : "Download Data"}
           </button>
         </div>
       </motion.div>
 
-      {/* Top Level Metrics (UPDATED WITH ANIMATED VALUES) */}
+      {/* Top Level Metrics */}
       <motion.div variants={itemVariants} className="grid grid-cols-2 gap-5 lg:grid-cols-4">
         {totalTasks === 0 ? (
           <>
