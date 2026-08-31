@@ -45,23 +45,36 @@ const chartFallback = (
   </div>
 );
 
-// --- NEW SKELETON COMPONENT ---
+// --- SKELETON COMPONENT ---
 const ChartSkeleton = () => (
   <div className="h-[260px] w-full animate-pulse rounded-md bg-slate-200"></div>
+);
+
+// --- NEW EMPTY STAT CARD COMPONENT ---
+const EmptyStatCard = ({ label, icon: Icon }: { label: string; icon: any }) => (
+  <div className="rounded-xl border border-slate-200 bg-white/50 p-6 shadow-sm opacity-70">
+    <div className="flex flex-row items-center justify-between pb-2">
+      <h3 className="text-sm font-medium text-slate-500">{label}</h3>
+      <Icon className="h-4 w-4 text-slate-400" />
+    </div>
+    <div className="mt-2 flex items-center">
+      <span className="text-lg font-semibold text-slate-400">No data yet</span>
+    </div>
+  </div>
 );
 
 export default function Analytics() {
   const tasks = useTaskStore((s) => s.tasks);
   const [timeRange, setTimeRange] = useState("30d");
   
-  // --- NEW LOADING STATE ---
+  // --- LOADING STATE ---
   const [isLoading, setIsLoading] = useState(true);
 
   // Simulate API fetch delay so skeletons are visible on page load
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1200); // 1.2 seconds of loading
+    }, 1200); 
     return () => clearTimeout(timer);
   }, []);
 
@@ -127,38 +140,49 @@ export default function Analytics() {
         </div>
       </motion.div>
 
-      {/* Top Level Metrics */}
+      {/* Top Level Metrics (UPDATED WITH EMPTY STATES) */}
       <motion.div variants={itemVariants} className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-        <StatCard
-          label="Completion Rate"
-          value={completionRate}
-          suffix="%"
-          trend={0}
-          icon={CheckCircle2}
-          accent="bg-[#141e30]/10 text-[#141e30]" 
-        />
-        <StatCard
-          label="Avg. Productivity"
-          value={tasks.length ? completionRate : 0}
-          suffix="%"
-          trend={0}
-          icon={TrendingUp}
-          accent="bg-slate-200 text-slate-700" 
-        />
-        <StatCard
-          label="Tasks Closed"
-          value={completedTasks}
-          trend={0}
-          icon={Zap}
-          accent="bg-[#243b55]/10 text-[#243b55]" 
-        />
-        <StatCard
-          label="Top Performer"
-          value={0}
-          suffix=" tasks"
-          icon={Award}
-          accent="bg-[#D4AF37]/15 text-[#b5952f]" 
-        />
+        {totalTasks === 0 ? (
+          <>
+            <EmptyStatCard label="Completion Rate" icon={CheckCircle2} />
+            <EmptyStatCard label="Avg. Productivity" icon={TrendingUp} />
+            <EmptyStatCard label="Tasks Closed" icon={Zap} />
+            <EmptyStatCard label="Top Performer" icon={Award} />
+          </>
+        ) : (
+          <>
+            <StatCard
+              label="Completion Rate"
+              value={completionRate}
+              suffix="%"
+              trend={0}
+              icon={CheckCircle2}
+              accent="bg-[#141e30]/10 text-[#141e30]" 
+            />
+            <StatCard
+              label="Avg. Productivity"
+              value={tasks.length ? completionRate : 0}
+              suffix="%"
+              trend={0}
+              icon={TrendingUp}
+              accent="bg-slate-200 text-slate-700" 
+            />
+            <StatCard
+              label="Tasks Closed"
+              value={completedTasks}
+              trend={0}
+              icon={Zap}
+              accent="bg-[#243b55]/10 text-[#243b55]" 
+            />
+            <StatCard
+              label="Top Performer"
+              value={0}
+              suffix=" tasks"
+              icon={Award}
+              accent="bg-[#D4AF37]/15 text-[#b5952f]" 
+            />
+          </>
+        )}
       </motion.div>
 
       {/* Primary Charts */}
