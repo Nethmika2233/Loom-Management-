@@ -16,24 +16,37 @@ interface KanbanColumnProps {
   onAddTask: (columnId: string, title: string) => void;
 }
 
+const TITLE_MAX_LENGTH = 80;
+
 export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const done = tasks.filter((t) => t.status === "done").length;
   const progress = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
-  const canSubmit = title.trim().length > 0;
+  const trimmedTitle = title.trim();
+  const canSubmit = trimmedTitle.length > 0 && trimmedTitle.length <= TITLE_MAX_LENGTH;
 
   const submit = () => {
-    if (!canSubmit) return;
-    onAddTask(column.id, title.trim());
+    if (trimmedTitle.length === 0) {
+      setError("Title is required");
+      return;
+    }
+    if (trimmedTitle.length > TITLE_MAX_LENGTH) {
+      setError(`Title must be ${TITLE_MAX_LENGTH} characters or fewer`);
+      return;
+    }
+    onAddTask(column.id, trimmedTitle);
     setTitle("");
+    setError(null);
     setAdding(false);
   };
 
   const cancelAdd = () => {
     setTitle("");
+    setError(null);
     setAdding(false);
   };
 
@@ -87,13 +100,19 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
               autoFocus
               placeholder="Task title..."
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              maxLength={TITLE_MAX_LENGTH}
+              aria-invalid={!!error}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (error) setError(null);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") submit();
                 if (e.key === "Escape") cancelAdd();
               }}
-              className="h-9"
+              className={cn("h-9", error && "border-danger-500 focus-visible:ring-danger-500")}
             />
+            {error && <p className="text-xs text-danger-600">{error}</p>}
             <div className="flex gap-2">
               <Button size="sm" onClick={submit} className="flex-1" disabled={!canSubmit}>
                 Add task
