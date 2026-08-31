@@ -62,7 +62,10 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
           <div className="flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: column.color }} />
             <h3 className="text-sm font-semibold">{column.title}</h3>
-            <span className="rounded-full bg-background px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+            <span
+              title={`${tasks.length} ${tasks.length === 1 ? "task" : "tasks"}`}
+              className="rounded-full bg-background px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground"
+            >
               {tasks.length}
             </span>
           </div>
