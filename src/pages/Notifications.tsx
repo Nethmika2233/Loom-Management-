@@ -12,6 +12,7 @@ import { NotificationIcon } from "@/components/notifications/notification-icon";
 import { useNotificationStore } from "@/store/notificationStore";
 import { formatNotificationTime, groupNotificationsByDay } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
+import type { AppNotification } from "@/types";
 
 type Filter = "all" | "unread";
 
@@ -34,6 +35,12 @@ export default function Notifications() {
   const handleMarkAllAsRead = async () => {
     await markAllAsRead();
     toast.success("All notifications marked as read");
+  };
+
+  const handleNotificationOpen = (notification: AppNotification) => {
+    if (!notification.read) {
+      void markAsRead(notification.id);
+    }
   };
 
   const filteredNotifications = useMemo(() => {
@@ -129,7 +136,7 @@ export default function Notifications() {
                       <NotificationIcon type={notification.type} />
                       <Link
                         to={notification.link ?? "#"}
-                        onClick={() => markAsRead(notification.id)}
+                        onClick={() => handleNotificationOpen(notification)}
                         className="min-w-0 flex-1"
                       >
                         <div className="flex flex-wrap items-center gap-2">
@@ -149,6 +156,7 @@ export default function Notifications() {
                       <Button
                         variant="ghost"
                         size="sm"
+                        aria-label={`Mark ${notification.title} as ${notification.read ? "unread" : "read"}`}
                         onClick={() => (notification.read ? markAsUnread(notification.id) : markAsRead(notification.id))}
                       >
                         {notification.read ? <Mail className="h-4 w-4" /> : <MailOpen className="h-4 w-4" />}

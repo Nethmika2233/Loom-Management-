@@ -13,6 +13,7 @@ import { useNotificationStore } from "@/store/notificationStore";
 import { NotificationIcon } from "@/components/notifications/notification-icon";
 import { formatNotificationTime } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
+import type { AppNotification } from "@/types";
 
 export function NotificationBell() {
   const notifications = useNotificationStore((s) => s.notifications);
@@ -24,6 +25,12 @@ export function NotificationBell() {
   const handleMarkAllAsRead = async () => {
     await markAllAsRead();
     toast.success("All notifications marked as read");
+  };
+
+  const handleNotificationOpen = (notification: AppNotification) => {
+    if (!notification.read) {
+      void markAsRead(notification.id);
+    }
   };
 
   return (
@@ -66,9 +73,10 @@ export function NotificationBell() {
             </div>
           ) : (
             previewNotifications.map((notification) => (
-              <DropdownMenuItem key={notification.id} asChild onClick={() => markAsRead(notification.id)}>
+              <DropdownMenuItem key={notification.id} asChild>
                 <Link
                   to={notification.link ?? "#"}
+                  onClick={() => handleNotificationOpen(notification)}
                   className={cn(
                     "flex items-start gap-3 border-l-2 border-transparent px-3 py-3",
                     !notification.read && "border-primary-600 bg-primary-50/70 dark:bg-primary-500/10"
