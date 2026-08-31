@@ -6,18 +6,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/common/empty-state";
 import { NotificationIcon } from "@/components/notifications/notification-icon";
 import { useNotificationStore } from "@/store/notificationStore";
 import { formatNotificationTime } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
 
-type Filter = "all" | "unread" | "read";
+type Filter = "all" | "unread";
 
 const FILTERS: { label: string; value: Filter }[] = [
   { label: "All", value: "all" },
   { label: "Unread", value: "unread" },
-  { label: "Read", value: "read" },
 ];
 
 export default function Notifications() {
@@ -38,8 +38,7 @@ export default function Notifications() {
     const normalizedQuery = query.trim().toLowerCase();
 
     return notifications.filter((notification) => {
-      const matchesFilter =
-        filter === "all" || (filter === "unread" && !notification.read) || (filter === "read" && notification.read);
+      const matchesFilter = filter === "all" || !notification.read;
       const matchesSearch =
         !normalizedQuery ||
         `${notification.title} ${notification.description}`.toLowerCase().includes(normalizedQuery);
@@ -88,18 +87,15 @@ export default function Notifications() {
             onChange={(event) => setQuery(event.target.value)}
           />
         </div>
-        <div className="flex gap-2">
-          {FILTERS.map((item) => (
-            <Button
-              key={item.value}
-              variant={filter === item.value ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter(item.value)}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </div>
+        <Tabs value={filter} onValueChange={(value) => setFilter(value as Filter)}>
+          <TabsList className="grid w-full grid-cols-2 sm:w-auto">
+            {FILTERS.map((item) => (
+              <TabsTrigger key={item.value} value={item.value}>
+                {item.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
       {notifications.length === 0 ? (
