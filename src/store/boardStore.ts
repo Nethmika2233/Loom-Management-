@@ -1,9 +1,11 @@
 import { create } from "zustand";
-import { mockBoards } from "@/mock";
 import type { Board } from "@/types";
+import { boardService } from "@/services/boardService";
 
 interface BoardState {
   boards: Board[];
+  setBoards: (boards: Board[]) => void;
+  loadBoards: () => Promise<void>;
   toggleFavorite: (id: string) => void;
   archiveBoard: (id: string) => void;
   deleteBoard: (id: string) => void;
@@ -13,39 +15,68 @@ interface BoardState {
   updateBoard: (id: string, updates: Partial<Board>) => void;
 }
 
-export const useBoardStore = create<BoardState>()((set) => ({
-  boards: mockBoards,
-  toggleFavorite: (id) =>
+// Fire-and-forget persistence to MongoDB (never blocks the UI)
+const persist = (fn: () => Promise<unknown>) => {
+  fn().catch((err) => console.error("Failed to save board to database:", err?.message || err));
+};
+
+export const useBoardStore = create<BoardState>()((set, get) => ({
+  boards: [],
+  setBoards: (boards) => set({ boards }),
+  loadBoards: async () => {
+    try {
+      const boards = await boardService.getBoards();
+      set({ boards });
+    } catch (err) {
+      console.error("Failed to load boards from database:", err);
+    }
+  },
+  toggleFavorite: (id) => {
+    const board = get().boards.find((b) => b.id === id);
     set((state) => ({
       boards: state.boards.map((b) => (b.id === id ? { ...b, favorite: !b.favorite } : b)),
-    })),
-  archiveBoard: (id) =>
+    }));
+    if (board) persist(() => boardService.updateBoard(id, { favorite: !board.favorite }));
+  },
+  archiveBoard: (id) => {
+    const board = get().boards.find((b) => b.id === id);
     set((state) => ({
       boards: state.boards.map((b) => (b.id === id ? { ...b, archived: !b.archived } : b)),
-    })),
-  deleteBoard: (id) =>
-    set((state) => ({ boards: state.boards.filter((b) => b.id !== id) })),
-  duplicateBoard: (id) =>
-    set((state) => {
-      const board = state.boards.find((b) => b.id === id);
-      if (!board) return state;
-      const copy: Board = {
-        ...board,
-        id: `b${Date.now()}`,
-        name: `${board.name} (Copy)`,
-        favorite: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      return { boards: [copy, ...state.boards] };
-    }),
-  renameBoard: (id, name) =>
+    }));
+    if (board) persist(() => boardService.updateBoard(id, { archived: !board.archived }));
+  },
+  deleteBoard: (id) => {
+    set((state) => ({ boards: state.boards.filter((b) => b.id !== id) }));
+    persist(() => boardService.deleteBoard(id));
+  },
+  duplicateBoard: (id) => {
+    const board = get().boards.find((b) => b.id === id);
+    if (!board) return;
+    const copy: Board = {
+      ...board,
+      id: `b${Date.now()}`,
+      name: `${board.name} (Copy)`,
+      favorite: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    set((state) => ({ boards: [copy, ...state.boards] }));
+    persist(() => boardService.createBoard(copy));
+  },
+  renameBoard: (id, name) => {
     set((state) => ({
       boards: state.boards.map((b) => (b.id === id ? { ...b, name } : b)),
-    })),
-  createBoard: (board) => set((state) => ({ boards: [board, ...state.boards] })),
-  updateBoard: (id, updates) =>
+    }));
+    persist(() => boardService.updateBoard(id, { name }));
+  },
+  createBoard: (board) => {
+    set((state) => ({ boards: [board, ...state.boards] }));
+    persist(() => boardService.createBoard(board));
+  },
+  updateBoard: (id, updates) => {
     set((state) => ({
       boards: state.boards.map((b) => (b.id === id ? { ...b, ...updates, updatedAt: new Date().toISOString() } : b)),
-    })),
+    }));
+    persist(() => boardService.updateBoard(id, updates));
+  },
 }));
