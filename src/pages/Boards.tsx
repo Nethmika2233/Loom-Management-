@@ -7,15 +7,27 @@ import { EmptyState } from "@/components/common/empty-state";
 import { BoardCard } from "@/components/board/board-card";
 import { RenameBoardDialog } from "@/components/board/rename-board-dialog";
 import { CreateBoardDialog } from "@/components/board/create-board-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useBoardStore } from "@/store/boardStore";
 import type { Board } from "@/types";
 
 export default function Boards() {
   const boards = useBoardStore((s) => s.boards);
+  const deleteBoard = useBoardStore((s) => (s as unknown as { deleteBoard?: (id: string) => void }).deleteBoard);
   const isLoading = useBoardStore((s) => (s as unknown as { isLoading?: boolean }).isLoading ?? false);
   const [tab, setTab] = useState<"all" | "favorites" | "archived">("all");
   const [query, setQuery] = useState("");
   const [renameTarget, setRenameTarget] = useState<Board | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Board | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
   const archivedCount = useMemo(() => boards.filter((b) => b.archived).length, [boards]);
@@ -33,6 +45,13 @@ export default function Boards() {
         return 0;
       });
   }, [boards, tab, query]);
+
+  const handleDeleteConfirm = () => {
+    if (deleteTarget && deleteBoard) {
+      deleteBoard(deleteTarget.id);
+    }
+    setDeleteTarget(null);
+  };
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
@@ -94,13 +113,30 @@ export default function Boards() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((board, i) => (
-            <BoardCard key={board.id} board={board} index={i} onRename={setRenameTarget} />
+            <BoardCard key={board.id} board={board} index={i} onRename={setRenameTarget} onDelete={setDeleteTarget} />
           ))}
         </div>
       )}
 
       <RenameBoardDialog board={renameTarget} onOpenChange={(v) => !v && setRenameTarget(null)} />
       <CreateBoardDialog open={createOpen} onOpenChange={setCreateOpen} />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this board?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete "{deleteTarget?.name}" and remove all of its associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogHeader>
+      </AlertDialog>
     </div>
   );
 }
