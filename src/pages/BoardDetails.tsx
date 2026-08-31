@@ -248,7 +248,7 @@ export default function BoardDetails() {
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <div className="flex min-h-0 flex-1 items-start gap-3 overflow-x-auto overscroll-x-contain scroll-smooth p-4 pb-2 sm:gap-4 sm:p-6">
+        <div className="flex min-h-0 flex-1 items-start gap-3 overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-proximity p-4 pb-2 sm:gap-4 sm:p-6">
           {sortedColumns.map((column) => (
             <KanbanColumn
               key={column.id}

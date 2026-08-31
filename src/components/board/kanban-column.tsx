@@ -66,7 +66,7 @@ export function KanbanColumn({ column, tasks, onTaskClick, onAddTask }: KanbanCo
       ref={setColumnDragRef}
       style={columnStyle}
       className={cn(
-        "flex min-h-0 w-[min(82vw,20rem)] shrink-0 flex-col rounded-2xl border border-border/60 bg-muted/40 transition-all duration-200 sm:w-80",
+        "flex min-h-0 w-[min(82vw,20rem)] shrink-0 snap-start flex-col rounded-2xl border border-border/60 bg-muted/40 transition-all duration-200 sm:w-80",
         isOver && "border-primary/60 ring-2 ring-primary/30",
         isColumnDragging && "opacity-50"
       )}
