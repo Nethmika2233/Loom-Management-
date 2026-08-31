@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/common/empty-state";
 import { NotificationIcon } from "@/components/notifications/notification-icon";
 import { useNotificationStore } from "@/store/notificationStore";
-import { formatNotificationTime } from "@/lib/notifications";
+import { formatNotificationTime, groupNotificationsByDay } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
 
 type Filter = "all" | "unread";
@@ -19,6 +19,8 @@ const FILTERS: { label: string; value: Filter }[] = [
   { label: "All", value: "all" },
   { label: "Unread", value: "unread" },
 ];
+
+const DAY_GROUPS = ["Today", "Yesterday", "Earlier"];
 
 export default function Notifications() {
   const [filter, setFilter] = useState<Filter>("all");
@@ -48,6 +50,7 @@ export default function Notifications() {
   }, [filter, notifications, query]);
 
   const read = notifications.length - unread;
+  const groupedNotifications = groupNotificationsByDay(filteredNotifications);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
@@ -103,44 +106,61 @@ export default function Notifications() {
       ) : filteredNotifications.length === 0 ? (
         <EmptyState icon={Search} title="No matching notifications" description="Try another search or filter." />
       ) : (
-        <Card className="divide-y divide-border overflow-hidden">
-          {filteredNotifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={cn(
-                "group flex items-start gap-3 border-l-4 border-transparent p-4 transition-colors hover:bg-muted/50",
-                !notification.read && "border-primary-600 bg-primary-50/70 shadow-sm dark:bg-primary-500/10"
-              )}
-            >
-              <NotificationIcon type={notification.type} />
-              <Link to={notification.link ?? "#"} onClick={() => markAsRead(notification.id)} className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-semibold">{notification.title}</p>
-                  {!notification.read && (
-                    <>
-                      <span className="h-2 w-2 rounded-full bg-primary-600 ring-2 ring-primary-100 dark:ring-primary-500/20" />
-                      <Badge variant="info">New</Badge>
-                    </>
-                  )}
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">{notification.description}</p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {formatNotificationTime(notification.createdAt)}
-                </p>
-              </Link>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  notification.read ? markAsUnread(notification.id) : markAsRead(notification.id)
-                }
-              >
-                {notification.read ? <Mail className="h-4 w-4" /> : <MailOpen className="h-4 w-4" />}
-                {notification.read ? "Unread" : "Read"}
-              </Button>
-            </div>
-          ))}
-        </Card>
+        <div className="space-y-5">
+          {DAY_GROUPS.map((group) => {
+            const groupNotifications = groupedNotifications[group] ?? [];
+
+            if (groupNotifications.length === 0) {
+              return null;
+            }
+
+            return (
+              <section key={group} className="space-y-2">
+                <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group}</h2>
+                <Card className="divide-y divide-border overflow-hidden">
+                  {groupNotifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={cn(
+                        "group flex items-start gap-3 border-l-4 border-transparent p-4 transition-colors hover:bg-muted/50",
+                        !notification.read && "border-primary-600 bg-primary-50/70 shadow-sm dark:bg-primary-500/10"
+                      )}
+                    >
+                      <NotificationIcon type={notification.type} />
+                      <Link
+                        to={notification.link ?? "#"}
+                        onClick={() => markAsRead(notification.id)}
+                        className="min-w-0 flex-1"
+                      >
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-semibold">{notification.title}</p>
+                          {!notification.read && (
+                            <>
+                              <span className="h-2 w-2 rounded-full bg-primary-600 ring-2 ring-primary-100 dark:ring-primary-500/20" />
+                              <Badge variant="info">New</Badge>
+                            </>
+                          )}
+                        </div>
+                        <p className="mt-1 text-sm text-muted-foreground">{notification.description}</p>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {formatNotificationTime(notification.createdAt)}
+                        </p>
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => (notification.read ? markAsUnread(notification.id) : markAsRead(notification.id))}
+                      >
+                        {notification.read ? <Mail className="h-4 w-4" /> : <MailOpen className="h-4 w-4" />}
+                        {notification.read ? "Unread" : "Read"}
+                      </Button>
+                    </div>
+                  ))}
+                </Card>
+              </section>
+            );
+          })}
+        </div>
       )}
     </div>
   );
