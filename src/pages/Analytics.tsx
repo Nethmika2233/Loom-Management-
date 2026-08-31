@@ -7,6 +7,41 @@ import { CompletionRateChart } from "@/components/charts/completion-rate-chart";
 import { MemberActivityChart } from "@/components/charts/member-activity-chart";
 import { WeeklyProductivityChart } from "@/components/charts/weekly-productivity-chart";
 import { useTaskStore } from "@/store/taskStore";
+import { Component, ReactNode } from "react";
+
+// Proper React Error Boundary
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback: ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+class ChartErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
+const chartFallback = (
+  <div className="flex h-[260px] items-center justify-center text-sm text-muted-foreground">
+    Unable to load chart. Please try refreshing.
+  </div>
+);
 
 export default function Analytics() {
   const tasks = useTaskStore((s) => s.tasks);
@@ -21,10 +56,10 @@ export default function Analytics() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Completion Rate" value={completionRate} suffix="%" trend={6} icon={CheckCircle2} accent="bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-500" />
-        <StatCard label="Avg. Productivity" value={78} suffix="%" trend={4} icon={TrendingUp} accent="bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400" />
-        <StatCard label="Tasks Closed (30d)" value={completed} trend={11} icon={Zap} accent="bg-secondary-50 text-secondary-600 dark:bg-secondary-500/10 dark:text-secondary-400" />
-        <StatCard label="Top Performer" value={31} suffix=" tasks" icon={Award} accent="bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-500" />
+        <StatCard label="Completion Rate" value={completionRate} suffix="%" trend={0} icon={CheckCircle2} accent="bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-500" />
+        <StatCard label="Avg. Productivity" value={tasks.length ? completionRate : 0} suffix="%" trend={0} icon={TrendingUp} accent="bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400" />
+        <StatCard label="Tasks Closed (30d)" value={completed} trend={0} icon={Zap} accent="bg-secondary-50 text-secondary-600 dark:bg-secondary-500/10 dark:text-secondary-400" />
+        <StatCard label="Top Performer" value={0} suffix=" tasks" icon={Award} accent="bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-500" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -33,7 +68,9 @@ export default function Analytics() {
             <CardTitle>Project Progress</CardTitle>
           </CardHeader>
           <CardContent>
-            <ProjectProgressChart />
+            <ChartErrorBoundary fallback={chartFallback}>
+              <ProjectProgressChart />
+            </ChartErrorBoundary>
           </CardContent>
         </Card>
         <Card>
@@ -41,7 +78,9 @@ export default function Analytics() {
             <CardTitle>Task Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <TaskStatusPieChart />
+            <ChartErrorBoundary fallback={chartFallback}>
+              <TaskStatusPieChart />
+            </ChartErrorBoundary>
           </CardContent>
         </Card>
       </div>
@@ -52,7 +91,9 @@ export default function Analytics() {
             <CardTitle>Completion Rate Trend</CardTitle>
           </CardHeader>
           <CardContent>
-            <CompletionRateChart />
+            <ChartErrorBoundary fallback={chartFallback}>
+              <CompletionRateChart />
+            </ChartErrorBoundary>
           </CardContent>
         </Card>
         <Card>
@@ -60,7 +101,9 @@ export default function Analytics() {
             <CardTitle>Weekly Performance</CardTitle>
           </CardHeader>
           <CardContent>
-            <WeeklyProductivityChart />
+            <ChartErrorBoundary fallback={chartFallback}>
+              <WeeklyProductivityChart />
+            </ChartErrorBoundary>
           </CardContent>
         </Card>
       </div>
@@ -70,7 +113,9 @@ export default function Analytics() {
           <CardTitle>Most Active Members</CardTitle>
         </CardHeader>
         <CardContent>
-          <MemberActivityChart />
+          <ChartErrorBoundary fallback={chartFallback}>
+            <MemberActivityChart />
+          </ChartErrorBoundary>
         </CardContent>
       </Card>
     </div>

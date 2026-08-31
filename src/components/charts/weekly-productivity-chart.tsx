@@ -1,7 +1,34 @@
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { weeklyProductivity } from "@/mock/analytics";
+import { useTaskStore } from "@/store/taskStore";
+import { format, subDays } from "date-fns";
 
 export function WeeklyProductivityChart() {
+  const tasks = useTaskStore((s) => s.tasks);
+
+  // Build weekly productivity from actual tasks
+  const weeklyProductivity = Array.from({ length: 7 }, (_, i) => {
+    const date = subDays(new Date(), 6 - i);
+    const dateStr = format(date, "yyyy-MM-dd");
+    const dayTasks = tasks.filter((t) => t.createdAt?.startsWith(dateStr));
+    const completed = dayTasks.filter((t) => t.status === "done").length;
+    const created = dayTasks.length;
+    return {
+      date: format(date, "EEE"),
+      completed,
+      created,
+    };
+  });
+
+  const hasData = weeklyProductivity.some((d) => d.completed > 0 || d.created > 0);
+
+  if (!hasData) {
+    return (
+      <div className="flex h-[260px] items-center justify-center text-sm text-muted-foreground">
+        No activity yet. Create and complete tasks to see productivity.
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height={260}>
       <LineChart data={weeklyProductivity} margin={{ top: 8, right: 12, left: -20, bottom: 0 }}>
