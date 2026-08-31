@@ -64,8 +64,15 @@ export function TaskCard({ task, onClick }: { task: Task; onClick: () => void })
                 <span className="flex items-center gap-1">
                   <CheckSquare className="h-3 w-3" /> {checklistDone}/{checklistTotal}
                 </span>
+                <span className={cn(checklistDone === checklistTotal && "font-medium text-success-600")}>
+                  {Math.round((checklistDone / checklistTotal) * 100)}%
+                </span>
               </div>
-              <Progress value={(checklistDone / checklistTotal) * 100} className="h-1" />
+              <Progress
+                value={(checklistDone / checklistTotal) * 100}
+                className="h-1"
+                indicatorClassName={cn(checklistDone === checklistTotal && "bg-success-600")}
+              />
             </div>
           )}
 
