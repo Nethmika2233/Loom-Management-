@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { ListTodo, ShieldCheck, Trello, UserCheck, Users, Search, Filter } from "lucide-react";
+import { ListTodo, ShieldCheck, Trello, UserCheck, Users, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -37,11 +37,16 @@ export default function AdminDashboard() {
   const tasks = useTaskStore((s) => s.tasks);
   const boards = useBoardStore((s) => s.boards);
   const [members, setMembers] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("all");
 
   useEffect(() => {
-    teamService.getMembers().then(setMembers);
+    setLoading(true);
+    teamService.getMembers().then((data) => {
+      setMembers(data);
+      setLoading(false);
+    });
   }, []);
 
   const onlineNow = members.filter((u) => u.status === "online").length;
@@ -82,11 +87,19 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
-        <StatCard label="Total Users" value={members.length} icon={Users} accent="bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400" delay={0} />
-        <StatCard label="Admins" value={adminCount} icon={ShieldCheck} accent="bg-secondary-50 text-secondary-600 dark:bg-secondary-500/10 dark:text-secondary-400" delay={0.03} />
-        <StatCard label="Online Now" value={onlineNow} icon={UserCheck} accent="bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-500" delay={0.06} />
-        <StatCard label="Workspaces" value={0} icon={Trello} accent="bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-500" delay={0.09} />
-        <StatCard label="Total Tasks" value={tasks.length} icon={ListTodo} accent="bg-danger-50 text-danger-600 dark:bg-danger-500/10 dark:text-danger-500" delay={0.12} />
+        {loading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-24 w-full animate-pulse rounded-xl bg-muted/60" />
+          ))
+        ) : (
+          <>
+            <StatCard label="Total Users" value={members.length} icon={Users} accent="bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400" delay={0} />
+            <StatCard label="Admins" value={adminCount} icon={ShieldCheck} accent="bg-secondary-50 text-secondary-600 dark:bg-secondary-500/10 dark:text-secondary-400" delay={0.03} />
+            <StatCard label="Online Now" value={onlineNow} icon={UserCheck} accent="bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-500" delay={0.06} />
+            <StatCard label="Workspaces" value={0} icon={Trello} accent="bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-500" delay={0.09} />
+            <StatCard label="Total Tasks" value={tasks.length} icon={ListTodo} accent="bg-danger-50 text-danger-600 dark:bg-danger-500/10 dark:text-danger-500" delay={0.12} />
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
