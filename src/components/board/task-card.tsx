@@ -92,7 +92,7 @@ export function TaskCard({ task, onClick }: { task: Task; onClick: () => void })
                 <span className="text-[11px]">{task.estimatedHours}h est.</span>
               )}
             </div>
-            <AvatarStack userIds={task.assigneeIds} max={3} size="h-6 w-6" />
+            <AvatarStack userIds={task.assigneeIds} users={[]} max={3} size="h-6 w-6" />
           </div>
         </Card>
       </motion.div>
