@@ -106,15 +106,20 @@ export default function Notifications() {
             <div
               key={notification.id}
               className={cn(
-                "group flex items-start gap-3 p-4 transition-colors hover:bg-muted/50",
-                !notification.read && "bg-primary-50/50 dark:bg-primary-500/5"
+                "group flex items-start gap-3 border-l-4 border-transparent p-4 transition-colors hover:bg-muted/50",
+                !notification.read && "border-primary-600 bg-primary-50/70 shadow-sm dark:bg-primary-500/10"
               )}
             >
               <NotificationIcon type={notification.type} />
               <Link to={notification.link ?? "#"} onClick={() => markAsRead(notification.id)} className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-sm font-semibold">{notification.title}</p>
-                  {!notification.read && <Badge variant="info">New</Badge>}
+                  {!notification.read && (
+                    <>
+                      <span className="h-2 w-2 rounded-full bg-primary-600 ring-2 ring-primary-100 dark:ring-primary-500/20" />
+                      <Badge variant="info">New</Badge>
+                    </>
+                  )}
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">{notification.description}</p>
                 <p className="mt-2 text-xs text-muted-foreground">

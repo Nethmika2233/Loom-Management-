@@ -64,15 +64,19 @@ export function NotificationBell() {
                 <Link
                   to={notification.link ?? "#"}
                   className={cn(
-                    "flex items-start gap-3 px-3 py-3",
-                    !notification.read && "bg-primary-50/50 dark:bg-primary-500/5"
+                    "flex items-start gap-3 border-l-2 border-transparent px-3 py-3",
+                    !notification.read && "border-primary-600 bg-primary-50/70 dark:bg-primary-500/10"
                   )}
                 >
                   <NotificationIcon type={notification.type} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="truncate text-sm font-medium">{notification.title}</p>
-                      {!notification.read && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary-600" />}
+                      <p className={cn("truncate text-sm", notification.read ? "font-medium" : "font-semibold text-foreground")}>
+                        {notification.title}
+                      </p>
+                      {!notification.read && (
+                        <span className="h-2 w-2 shrink-0 rounded-full bg-primary-600 ring-2 ring-primary-100 dark:ring-primary-500/20" />
+                      )}
                     </div>
                     <p className="line-clamp-2 text-xs text-muted-foreground">{notification.description}</p>
                     <p className="mt-1 text-[11px] text-muted-foreground">
