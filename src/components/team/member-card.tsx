@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials, cn } from "@/lib/utils";
 import { useTaskStore } from "@/store/taskStore";
@@ -26,7 +27,7 @@ const ROLE_VARIANT: Record<User["role"], "default" | "info" | "secondary" | "out
  * Displays a single team member's profile information, status, and task completion stats.
  * Animated on render using framer-motion.
  */
-export function MemberCard({ member, index = 0 }: { member: User; index?: number }) {
+export function MemberCard({ member, index = 0, onRemove }: { member: User; index?: number; onRemove?: () => void }) {
   const tasks = useTaskStore((s) => s.tasks);
   
   // Calculate how many tasks are assigned and completed for this specific member
@@ -48,12 +49,26 @@ export function MemberCard({ member, index = 0 }: { member: User; index?: number
             />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold">{member.name}</p>
+            <div className="flex items-center gap-2">
+              <p className="truncate text-sm font-semibold">{member.name}</p>
+              {member.status === "online" ? (
+                <span className="inline-flex h-2.5 w-2.5 rounded-full bg-green-500" aria-label="Online" />
+              ) : (
+                <span className="text-[10px] font-medium text-slate-400">Last seen recently</span>
+              )}
+            </div>
             <p className="truncate text-xs text-muted-foreground">{member.title}</p>
           </div>
-          <Badge variant={ROLE_VARIANT[member.role]} className="capitalize">
-            {member.role}
-          </Badge>
+          <div className="flex flex-col items-end gap-2">
+            <Badge variant={ROLE_VARIANT[member.role]} className="capitalize">
+              {member.role}
+            </Badge>
+            {onRemove && (
+              <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive" onClick={onRemove}>
+                Remove
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
