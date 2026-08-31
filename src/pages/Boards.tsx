@@ -18,6 +18,8 @@ export default function Boards() {
   const [renameTarget, setRenameTarget] = useState<Board | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
+  const archivedCount = useMemo(() => boards.filter((b) => b.archived).length, [boards]);
+
   const filtered = useMemo(() => {
     return boards
       .filter((b) => (tab === "archived" ? b.archived : !b.archived))
@@ -49,7 +51,7 @@ export default function Boards() {
           <TabsList>
             <TabsTrigger value="all">All Boards</TabsTrigger>
             <TabsTrigger value="favorites">Favorites</TabsTrigger>
-            <TabsTrigger value="archived">Archived</TabsTrigger>
+            <TabsTrigger value="archived">Archived {archivedCount > 0 ? `(${archivedCount})` : ""}</TabsTrigger>
           </TabsList>
         </Tabs>
 
