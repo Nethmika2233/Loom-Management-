@@ -119,13 +119,6 @@ export default function Analytics() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleDownload = () => {
-    setIsDownloading(true);
-    setTimeout(() => {
-      setIsDownloading(false);
-    }, 2000);
-  };
-
   const handleRefresh = () => {
     setIsRefreshing(true);
     setIsLoading(true); 
@@ -142,12 +135,10 @@ export default function Analytics() {
     const completed = tasks.filter((t) => t.status === "done").length;
     const rate = total ? Math.round((completed / total) * 100) : 0;
 
-    // Priority metrics
     const high = tasks.filter((t) => t.priority === "high").length;
     const medium = tasks.filter((t) => t.priority === "medium").length;
     const low = tasks.filter((t) => t.priority === "low").length;
 
-    // Status metrics
     const todo = tasks.filter((t) => t.status === "todo").length;
     const inProgress = tasks.filter((t) => {
       const status = String(t.status);
@@ -163,7 +154,43 @@ export default function Analytics() {
     };
   }, [tasks]);
 
-  // --- NEW: SMART INSIGHT LOGIC ---
+  // --- NEW: REAL CSV EXPORT FUNCTIONALITY ---
+  const handleDownload = () => {
+    setIsDownloading(true);
+    
+    setTimeout(() => {
+      // Build the CSV content
+      const csvHeaders = "Metric,Value\n";
+      const csvRows = [
+        `Total Tasks,${totalTasks}`,
+        `Completed Tasks,${completedTasks}`,
+        `Completion Rate,${completionRate}%`,
+        `High Priority Tasks,${priorityBreakdown.high}`,
+        `Medium Priority Tasks,${priorityBreakdown.medium}`,
+        `Low Priority Tasks,${priorityBreakdown.low}`,
+        `Tasks To Do,${statusBreakdown.todo}`,
+        `Tasks In Progress,${statusBreakdown.inProgress}`
+      ].join("\n");
+      
+      const csvContent = csvHeaders + csvRows;
+      
+      // Create a downloadable blob
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `loom-analytics-report-${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      
+      // Trigger the download
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      setIsDownloading(false);
+    }, 1500); // Small delay for the animation effect
+  };
+
   const getSmartInsight = () => {
     if (totalTasks === 0) return "Start assigning tasks to your team to generate real-time analytics and insights.";
     if (priorityBreakdown.high > 5 && completionRate < 50) {
@@ -198,10 +225,20 @@ export default function Analytics() {
     >
       {/* Header Section */}
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-slate-300 pb-6">
-        <div className="space-y-1">
-          <h1 className="text-4xl font-extrabold tracking-tight text-[#141e30]">
-            Analytics Overview
-          </h1>
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <h1 className="text-4xl font-extrabold tracking-tight text-[#141e30]">
+              Analytics Overview
+            </h1>
+            {/* --- NEW: LIVE SYSTEM PULSE --- */}
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 border border-emerald-200 mt-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Live</span>
+            </div>
+          </div>
           <p className="text-sm font-medium text-slate-500">
             Deep insights into your team's performance and project trajectory.
           </p>
@@ -246,7 +283,7 @@ export default function Analytics() {
         </div>
       </motion.div>
 
-      {/* --- NEW: SMART INSIGHTS BANNER --- */}
+      {/* Smart Insights Banner */}
       <motion.div variants={itemVariants} className="bg-gradient-to-r from-[#141e30] to-[#243b55] rounded-xl p-4 shadow-md flex items-center gap-4 text-white">
         <div className="bg-[#D4AF37]/20 p-2.5 rounded-lg border border-[#D4AF37]/30">
           <Sparkles className="h-6 w-6 text-[#D4AF37]" />
@@ -302,14 +339,13 @@ export default function Analytics() {
         )}
       </motion.div>
 
-      {/* --- SUBSTANTIVE SECTION: TASK HEALTH & WORKLOAD BREAKDOWN --- */}
+      {/* Workload Health & Priority Breakdown */}
       <motion.div variants={itemVariants}>
         <Card className="border-t-4 border-t-[#4F46E5] shadow-sm bg-white">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-[#141e30]">Workload Health & Priority Breakdown</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-            {/* Priority Distribution */}
             <div className="space-y-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
               <h4 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Tasks by Priority</h4>
               <div className="space-y-3">
@@ -343,7 +379,6 @@ export default function Analytics() {
               </div>
             </div>
 
-            {/* Status Distribution */}
             <div className="space-y-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
               <h4 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Task Pipeline Status</h4>
               <div className="space-y-3">
