@@ -56,7 +56,11 @@ export function TaskCard({ task, onClick }: { task: Task; onClick: () => void })
           </div>
 
           <p className="mt-2 text-sm font-medium leading-snug">{task.title}</p>
-          {task.description && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{task.description}</p>}
+          {task.description ? (
+            <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{task.description}</p>
+          ) : (
+            <p className="mt-1 text-xs italic text-muted-foreground/60">No description</p>
+          )}
 
           {checklistTotal > 0 && (
             <div className="mt-2.5 space-y-1">
@@ -64,8 +68,15 @@ export function TaskCard({ task, onClick }: { task: Task; onClick: () => void })
                 <span className="flex items-center gap-1">
                   <CheckSquare className="h-3 w-3" /> {checklistDone}/{checklistTotal}
                 </span>
+                <span className={cn(checklistDone === checklistTotal && "font-medium text-success-600")}>
+                  {Math.round((checklistDone / checklistTotal) * 100)}%
+                </span>
               </div>
-              <Progress value={(checklistDone / checklistTotal) * 100} className="h-1" />
+              <Progress
+                value={(checklistDone / checklistTotal) * 100}
+                className="h-1"
+                indicatorClassName={cn(checklistDone === checklistTotal && "bg-success-600")}
+              />
             </div>
           )}
 
