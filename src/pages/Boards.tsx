@@ -7,22 +7,51 @@ import { EmptyState } from "@/components/common/empty-state";
 import { BoardCard } from "@/components/board/board-card";
 import { RenameBoardDialog } from "@/components/board/rename-board-dialog";
 import { CreateBoardDialog } from "@/components/board/create-board-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useBoardStore } from "@/store/boardStore";
 import type { Board } from "@/types";
 
 export default function Boards() {
   const boards = useBoardStore((s) => s.boards);
+  const deleteBoard = useBoardStore((s) => (s as unknown as { deleteBoard?: (id: string) => void }).deleteBoard);
+  const isLoading = useBoardStore((s) => (s as unknown as { isLoading?: boolean }).isLoading ?? false);
   const [tab, setTab] = useState<"all" | "favorites" | "archived">("all");
   const [query, setQuery] = useState("");
   const [renameTarget, setRenameTarget] = useState<Board | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Board | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+
+  const archivedCount = useMemo(() => boards.filter((b) => b.archived).length, [boards]);
 
   const filtered = useMemo(() => {
     return boards
       .filter((b) => (tab === "archived" ? b.archived : !b.archived))
       .filter((b) => (tab === "favorites" ? b.favorite : true))
-      .filter((b) => b.name.toLowerCase().includes(query.toLowerCase()));
+      .filter((b) => b.name.toLowerCase().includes(query.toLowerCase()))
+      .sort((a, b) => {
+        if (tab === "all") {
+          if (a.favorite && !b.favorite) return -1;
+          if (!a.favorite && b.favorite) return 1;
+        }
+        return 0;
+      });
   }, [boards, tab, query]);
+
+  const handleDeleteConfirm = () => {
+    if (deleteTarget && deleteBoard) {
+      deleteBoard(deleteTarget.id);
+    }
+    setDeleteTarget(null);
+  };
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
@@ -41,7 +70,7 @@ export default function Boards() {
           <TabsList>
             <TabsTrigger value="all">All Boards</TabsTrigger>
             <TabsTrigger value="favorites">Favorites</TabsTrigger>
-            <TabsTrigger value="archived">Archived</TabsTrigger>
+            <TabsTrigger value="archived">Archived {archivedCount > 0 ? `(${archivedCount})` : ""}</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -51,11 +80,28 @@ export default function Boards() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="h-32 rounded-lg border bg-muted/40 animate-pulse p-4 space-y-3">
+              <div className="h-5 w-3/4 rounded bg-muted" />
+              <div className="h-4 w-1/2 rounded bg-muted" />
+            </div>
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
         <EmptyState
           icon={Trello}
-          title="No boards found"
-          description={tab === "archived" ? "You haven't archived any boards yet." : "Create your first board to start organizing tasks."}
+          title={query ? "No matching boards" : "No boards found"}
+          description={
+            query
+              ? `No boards matched "${query}". Try searching for something else.`
+              : tab === "archived"
+              ? "You haven't archived any boards yet."
+              : tab === "favorites"
+              ? "You haven't starred any favorite boards yet."
+              : "No boards exist yet. Create your first board to start organizing tasks."
+          }
           action={
             tab !== "archived" && (
               <Button onClick={() => setCreateOpen(true)}>
@@ -67,13 +113,30 @@ export default function Boards() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((board, i) => (
-            <BoardCard key={board.id} board={board} index={i} onRename={setRenameTarget} />
+            <BoardCard key={board.id} board={board} index={i} onRename={setRenameTarget} onDelete={setDeleteTarget} />
           ))}
         </div>
       )}
 
       <RenameBoardDialog board={renameTarget} onOpenChange={(v) => !v && setRenameTarget(null)} />
       <CreateBoardDialog open={createOpen} onOpenChange={setCreateOpen} />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this board?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete "{deleteTarget?.name}" and remove all of its associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogHeader>
+      </AlertDialog>
     </div>
   );
 }
